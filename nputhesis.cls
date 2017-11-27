@@ -232,7 +232,7 @@
       \vspace{1\baselineskip}
       In partial fulfillment of the requirement\\
       For the degree of\\
-      Doctor of \@major@en\\
+      Master of \@major@en\\
       \vspace{4\baselineskip}
       Xi'an P. R. China\\
       \@applydate@en
@@ -314,6 +314,6 @@
     \hfill\hskip8.5cm \npu@ymd
   \end{titlepage}}
 
-\input{npuphd.cfg}
+\input{npumaster.cfg}
 
 \endinput
