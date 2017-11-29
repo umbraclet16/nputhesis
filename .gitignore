@@ -13,3 +13,4 @@ tags
 *.blg
 *.synctex
 auto
+.DS_Store
