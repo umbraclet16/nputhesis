@@ -17,8 +17,8 @@
 
 \RequirePackage{ctexcap}
 
-\geometry{paperwidth=207mm,paperheight=290mm,%
-  left=3.0cm,right=3.0cm,top=2.5cm,bottom=2.5cm}
+\geometry{paperwidth=210mm,paperheight=297mm,%
+  left=2.5cm,right=2.5cm,top=2.54cm,bottom=2.54cm}
 \topmargin=-10.4mm
 \headheight=17pt
 \footskip=8mm
@@ -171,7 +171,7 @@
       \makebox[\name@length][s]{\zihao{1}\npu@degree}
       \vskip5mm
       \centerline{\zihao{4}\npu@degreeclass}
-      \vskip4cm
+      \vskip5cm
       \zihao{2}
       \begin{minipage}[t]{2.5cm}
         \hfil\npu@title\npu@comma
@@ -191,7 +191,7 @@
         \end{minipage}}
       \hskip-1cm
       \copy123\kern-\wd123\box124
-      \par\vspace{3cm}
+      \par\vspace{4cm}
       \zihao{3}
       \settowidth{\name@length}{\npu@major}
       \begin{minipage}{8cm}
