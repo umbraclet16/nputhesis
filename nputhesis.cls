@@ -243,9 +243,9 @@
 \def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
   \hbox{}
   \vspace*{\fill}
-  \begin{center}
-    \Large This Page Intentionally Left Blank!
-  \end{center}
+  %\begin{center}
+    %\Large This Page Intentionally Left Blank!
+  %\end{center}
   \vspace{\fill}
   \thispagestyle{empty}
   \newpage
