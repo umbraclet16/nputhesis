@@ -25,14 +25,16 @@
 \headsep=5mm
 
 \ifx\ctexset\undefined
-  \CTEXsetup[name={,}, number={\arabic{chapter}},%
+  %\CTEXsetup[name={第,章}, number={\arabic{chapter}},%
+  \CTEXsetup[name={第,章}, number={\chinese{chapter}},%
     beforeskip={20pt}, afterskip={20pt}]{chapter}
   \CTEXsetup[nameformat={\heiti\zihao{3}\bf}]{chapter}
   \CTEXsetup[titleformat={\heiti\zihao{3}}]{chapter}
   \CTEXsetup[format={\heiti\zihao{4}}]{section}
   \CTEXsetup[format={\heiti\zihao{-4}}]{subsection}
 \else
-  \ctexset{chapter={name={,}, number={\arabic{chapter}}, %
+  %\ctexset{chapter={name={第,章}, number={\arabic{chapter}}, %
+  \ctexset{chapter={name={第,章}, number={\chinese{chapter}}, %
       beforeskip={20pt}, afterskip={20pt}}}
   \ctexset{chapter={nameformat={\heiti\zihao{3}\bf}}}
   \ctexset{chapter={titleformat={\heiti\zihao{3}}}}
