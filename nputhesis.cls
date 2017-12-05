@@ -57,9 +57,10 @@
 \renewcommand{\chaptermark}[1]{\markboth{%
   \if@mainmatter%
     \ifnum\arabic{chapter}>0%
-      \arabic{chapter}\quad%
+      第\chinese{chapter}章\quad%
     \fi
   \fi#1}{}}
+
 \fancyhf{}
 \fancyhead[EC]{\songti\zihao{-5}\npu@rightmark}
 \fancyhead[OC]{\songti\zihao{-5}\leftmark}
