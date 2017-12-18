@@ -144,27 +144,41 @@ KITTI数据集包含真实场景的数据，但其数据量较小，且ground tr
 
 本文使用TensorFlow\cite{abadi2016tensorflow}作为搭建、训练网络模型的软件平台。
 % TODO: TensorFlow只介绍一次，如果第三章写目标检测，就不用放在这里了！
-（（TensorFlow是谷歌基于DistBelief开发的第二代人工智能学习系统，其采用数据流图(data flow graph)的形式来建立模型，图中每个节点表示一个数学运算或数据的输入/输出，每条边则表示节点间的输入输出关系，边上传输的是多维数组数据，即张量(Tensor)。TensorFlow具有自动求微分的功能，非常适合于深度学习等基于梯度的机器学习算法。））
-
 % TODO: Adam有必要介绍一下公式吗？
-梯度下降使用Adam（Adaptive moment estimation，自适应矩估计）优化器\cite{kingma2014adam}，参数设置：$\beta_1=0.9, \beta_2=0.999$。学习率初始化为$\lambda=0.0001$，在训练迭代400k次后每200k减半。
-损失函数定义为6个尺度下的损失的加权和。每个尺度下的损失定义为该尺度下的预测结果$pr_n$和视差真值$gt_n$的绝对误差和。各尺度下的视差真值是由网络输入的视差图通过最近邻插值得到的。
+% https://zhuanlan.zhihu.com/p/22252270
+% http://ruder.io/optimizing-gradient-descent/index.html#adam
+梯度下降使用Adam（Adaptive moment estimation，自适应矩估计）优化器\cite{kingma2014adam}，参数设置：$\beta_1=0.9, \beta_2=0.999$。
+% 实际上程序里beta_2是0.99。。。
+Adam算法根据损失函数对每个参数的梯度的一阶矩估计和二阶矩估计动态调整每个参数的学习率，其优点在于经过偏置校正后，学习率在每次迭代中都有个确定的范围，使得参数变化比较平稳。更新规则为：
+\begin{equation}\label{eq_4_2_Adam}
+\begin{cases}
+m_t = \beta_1 m_{t-1} + (1 - \beta_1)g_t \\
+v_t = \beta_2 v_{t-1} + (1 - \beta_2) g_t^2 \\
+\hat{m}_t = \frac{m_t}{1 - \beta_1^t} \\
+\hat{v}_t = \frac{v_t}{1 - \beta_2^{t}} \\
+\theta_{t+1} = \theta_t - \frac{\hat{m}_t}{\sqrt{\hat{v_t} + \epsilon}} \eta
+\end{cases}
+\end{equation}
+其中，$g_t$为t时刻的梯度，$m_t$、$v_t$分别是梯度的一阶和二阶矩估计，$\hat{m_t}$、$\hat{n_t}$是偏置校正后的矩估计，$\eta$为学习率，$\theta$为更新的参数。可见$\frac{\hat{m_t}}{\sqrt{\hat{v_t}}+\epsilon}$对学习率形成了一个动态的约束。
+
+学习率初始化为$\eta=0.0001$，在训练迭代400k次后每200k减半。
+损失函数定义为6个尺度下的损失的加权和。每个尺度下的损失定义为该尺度下的预测结果$P_n$和视差真值$G_n$的绝对误差和。各尺度下的视差真值是由网络输入的视差图通过最近邻插值得到的。
 另外加入L2正则化项，权重取为$\alpha=0.0004$，用于防止模型过拟合，提高泛化能力。
 \begin{equation}\label{eq:4_2_loss_all}
 loss = \sum_{n=1}^{6}{w_n * loss_n} + \alpha ||\theta||_2^2
 \end{equation}
 \begin{equation}\label{eq:4_2_loss_single}
-loss_n = \sum_{i=1}^{H_n}\sum_{j=1}^{W_n}{|pr_n(i, j) - gt_n(i, j)|}
+loss_n = \sum_{i=1}^{H_n}\sum_{j=1}^{W_n}{|P_n(i, j) - G_n(i, j)|}
 \end{equation}
 公式中$w_n$表示尺度$n$下的损失权重，$\alpha||\theta||_2^2$为正则化项，$W_n$和$H_n$分别为尺度$n$下图像的宽和高。
 
 由于网络比较深，且收缩部分和扩张部分之间存在直接的连接，如果同时计入6个尺度的损失，网络中低层的梯度方向受到多个损失的影响，损失函数可能无法高效地下降。为损失权重设计一个进度表（表\ref{tab:4_2_loss_weight_schedule}）可以改善这种情况：开始训练时，设置最小尺度的loss6的权重为1，其余尺度的loss权重为0；随着训练的进行，逐渐增大高分辨率尺度损失的权重，降低低分辨率尺度损失的权重。这样使得网络先学习到粗糙的表示，然后向更精细的方向发展，同时损失函数不再对中低层特征进行限制。
 
-\begin{table}[htbp]
+\begin{table}[htb]
 	\centering
 	\caption{损失函数权重进度表}
 	\label{tab:4_2_loss_weight_schedule}
-	\begin{scriptsize}
+	\begin{small} %{scriptsize}
 		\begin{tabular}{|l|cccccc|}\hline
 			迭代次数  & $w_1$ & $w_2$ & $w_3$ & $w_4$ & $w_5$ & $w_6$ \\\hline
 			%---------------------------------------------------------
@@ -176,17 +190,410 @@ loss_n = \sum_{i=1}^{H_n}\sum_{j=1}^{W_n}{|pr_n(i, j) - gt_n(i, j)|}
 			(250k, 300k]    & 1 & 0.5 & 0 & 0 & 0 & 0  \\
 			(300k, --)          & 1 & 0 & 0 & 0 & 0 & 0 \\\hline
 		\end{tabular}
-	\end{scriptsize}
+	\end{small} %{scriptsize}
 \end{table}
-
-
-\subsection{网络测试过程}
-介绍一下前向传播过程和对输出做resize的操作？
 
 %------------------------------------------------------------------------------------
 \section{实验结果}
-计算机配置。
+本实验的运行环境与目标检测实验相同。
+
+\subsection{评价指标}
+目前立体匹配领域使用最多的评价指标是平均视差误差(Endpoint error)，其定义为预测结果中各点的视差值与视差真值的绝对误差均值：
+\begin{equation}\label{eq:4_3_endpoint_error}
+e = \frac{1}{M} \left( \sum_{\mathbf{p} \in \mathbf{A}} | d(\mathbf{p}) - d_{gt}(\mathbf{p}) | \right)
+\end{equation}
+其中，$\mathbf{A}$表示真实视差图中有效视差点的集合（即具有非零像素值的点），M为有效视差点的数量，$d(\mathbf{p})$和$d_{gt}(\mathbf{p})$分别表示计算所得的视差图和真实视差图中点$\mathbf{p}$的视差值。
+
+KITTI2015中使用了另一种评价指标：平均错误率(D)，或称为误匹配像素百分比(PBM, Percentage of Bad Matching)。其定义为匹配结果中视差值误差同时大于3像素和视差真值的5\%的像素点所占比例：
+\begin{equation}\label{eq:4_3_D1_error}
+D = \frac{1}{M}\left( \sum_{\mathbf{p} \in \mathbf{A}} \Big[ \big| d(\mathbf{p}) - d_{gt}(\mathbf{p})) \big| > max(3\mathtt{px}, d_{gt}(\mathbf{p}) \times 5\%) \Big] \right)
+\end{equation}
+
+下文中提到“误差”时默认指第一种指标，使用第二种指标时会明确指明"D1"，1表示误差的计算是在左图上进行的。
+
+\subsection{FlyingThings3D上的实验结果}
+使用FlyingThings3D数据集训练1.4e5个迭代，网络的损失函数和训练/测试误差的变化趋势分别如图\ref{fig:4_3_ft3d_loss}和\ref{fig:4_3_ft3d_error}所示（数据已做平滑处理）。训练误差是每轮迭代中batch（4组图片）的平均误差，测试误差是每5000次迭代在整个测试集（4370组图片）上测试得到的平均误差。由图可见，损失函数在1000k次迭代后基本已经收敛，不再有明显的下降；训练误差仍在非常缓慢地下降，但测试误差已经收敛，继续训练只会造成过拟合。
+%解释一下为什么200k误差突变。
+% TODO：这个脑残的loss weight schedule怎么洗白啊。。。
+训练/测试误差在200k次迭代时的突变是由于损失函数权重的调整造成的。对照表\ref{tab:4_2_loss_weight_schedule}，200k之前loss1未计入loss，而误差是在loss1对应尺度（384x192）下定义的，故误差并没有明显的下降。但前200k的训练并不是无效的，因为损失函数获得了有效的下降。
+
+%--------------------- 每张图一行
+%\begin{figure}[!htbp]
+%	\centering\includegraphics[width=4in]{figures/4_3_ft3d_loss}
+%	\caption{损失函数变化趋势}\label{fig:4_3_ft3d_loss}
+%\end{figure}
+%\begin{figure}[!htbp]
+%	\centering\includegraphics[width=4in]{figures/4_3_ft3d_error}
+%	\caption{训练/测试误差变化趋势}\label{fig:4_3_ft3d_error}
+%\end{figure}
+
+%--------------------- 2张图同一行
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{0.48\textwidth}
+		\centering
+		\includegraphics[width=3in]{figures/4_3_ft3d_loss}
+		\caption{损失函数变化趋势}\label{fig:4_3_ft3d_loss}
+	\end{minipage}
+	\hfill
+	\begin{minipage}[c]{0.48\textwidth}
+		\centering
+		\includegraphics[width=3in]{figures/4_3_ft3d_error}
+		\caption{训练/测试误差变化趋势}\label{fig:4_3_ft3d_error}
+	\end{minipage}
+\end{figure}
+
+训练1400k后，最终的测试误差为: $e = 3.78$px, $D1 = 14.94\%$。
+需要说明的是，FlyingThings3D数据集本身存在一些缺陷，其中有些失效的图片，还有无法单纯依靠匹配算法进行匹配的图片（如图\ref{fig:4_3_abnormal})，这些数据难以从数据集中剔除，因此测试结果的误差会比应用在现实场景中时偏大。
+
+% abnormal image pairs
+\begin{figure}[!htbp]
+	\centering\includegraphics[width=2.5in]{figures/4_3_abnormal_imgs/l_003}
+	\hspace{20pt}
+	\centering\includegraphics[width=2.5in]{figures/4_3_abnormal_imgs/r_003}
+	\caption{FlyingThings3D中难以匹配的图片}\label{fig:4_3_abnormal}
+\end{figure}
+
+为了体现算法的效果，我们与两种优秀的传统立体匹配算法SGM\cite{Hirschmuller08}、SPS-St\cite{yamaguchi2014}进行比较。图\ref{fig:4_3_ft3d_cmp_result}给出了应用三种算法在FlyingThings3D部分测试图片上的匹配结果。
+
+
+% 三种算法在ft3d上的匹配结果对比图. 
+\begin{figure}[!htb]
+	% 3组占不满一页，4组放不开，蛋疼。‘!’忽略美学标准，强制和文字凑一页。
+	%>>>>>>>>>>>>>>>>>>>>第1组>>>>>>>>>>>>>>>>>>>>
+	%----------------------第1行-----------------------
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/l_000}}
+		\vspace{-10pt}
+		\centerline{左图}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/r_000}}
+		\vspace{-10pt}
+		\centerline{右图}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/gt_000}}
+		\vspace{-10pt}
+		\centerline{ground truth}
+	\end{minipage}
+	\vfill
+	%----------------------第2行----------------------
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/sgm_000}}
+		\vspace{-10pt}
+		\centerline{SGM}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/sps_000}}
+		\vspace{-10pt}
+		\centerline{SPS-St}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/pred_000}}
+		\vspace{-10pt}
+		\centerline{DispNetC}
+	\end{minipage}
+	%<<<<<<<<<<<<<<<<<<<<第1组<<<<<<<<<<<<<<<<<<<<
+	%>>>>>>>>>>>>>>>>>>>>第2组>>>>>>>>>>>>>>>>>>>>
+	%----------------------第1行-----------------------
+		\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/l_005}}
+		\vspace{-10pt}
+		\centerline{左图}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/r_005}}
+		\vspace{-10pt}
+		\centerline{右图}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/gt_005}}
+		\vspace{-10pt}
+		\centerline{ground truth}
+	\end{minipage}
+	\vfill
+	%----------------------第2行-----------------------
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/sgm_005}}
+		\vspace{-10pt}
+		\centerline{SGM}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/sps_005}}
+		\vspace{-10pt}
+		\centerline{SPS-St}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.3\linewidth}
+	\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/pred_005}}
+	\vspace{-10pt}
+	\centerline{DispNetC}
+\end{minipage}
+	%<<<<<<<<<<<<<<<<<<<<第2组<<<<<<<<<<<<<<<<<<<<
+	%>>>>>>>>>>>>>>>>>>>>第3组>>>>>>>>>>>>>>>>>>>>
+	%----------------------第1行-----------------------
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/l_039}}
+		\vspace{-10pt}
+		\centerline{左图}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/r_039}}
+		\vspace{-10pt}
+		\centerline{右图}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/gt_039}}
+		\vspace{-10pt}
+		\centerline{ground truth}
+	\end{minipage}
+	\vfill
+	%----------------------第2行-----------------------
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/sgm_039}}
+		\vspace{-10pt}
+		\centerline{SGM}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/sps_039}}
+		\vspace{-10pt}
+		\centerline{SPS-St}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.3\linewidth}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/pred_039}}
+		\vspace{-10pt}
+		\centerline{DispNetC}
+	\end{minipage}
+	%<<<<<<<<<<<<<<<<<<<<第3组<<<<<<<<<<<<<<<<<<<<
+	\caption{DispNetC, SGM和SPS-St在FlyingThings3D部分测试图片上的匹配结果}
+	\label{fig:4_3_ft3d_cmp_result}
+\end{figure}
+
+%--------------------- 优缺点 --------------------- 
+对比三种算法的结果，可以看出本文算法具有以下优点：
+
+（1）
+%匹配精度高，%这句话说不出来了。。
+对全局信息的利用较好，可以较准确地推理出缺少纹理区域和遮挡区域的视差，生成100\%稠密的视差图。SGM算法得到的结果中有很多匹配失败的点，无法得到被遮挡区域的视差，而且视差搜索范围越大得到的视差图越小（左侧黑色区域越大）。SPS-St算法由于使用了倾斜平面模型(slanted plane model)，能得到一部分遮挡区域的视差，但丢失大量细节，前景膨胀严重，在视差不连续处表现较差。
+
+（2）
+运行速度快。由于大部分计算在GPU上进行，DispNetC网络在每次输入一组图片时前向传播速度约为0.05s，具有较好的实时性；而SGM的运行时间与最大视差范围、窗口尺寸等参数有关，视差搜索范围和匹配窗口越大，运行时间越长，一般在0.2s以上；SPS-St采用SGM作为初始步骤，计算量更大，运行时间约为2s，完全无法应用于有实时性要求的场景。
+
+（3）
+应用简便，通用性好，鲁棒性强。SGM等算法需要人工设置搜索范围、匹配窗口尺寸等参数以适应不同的应用场景，而DispNetC完全从图像数据中学习匹配规律，网络训练完成后可直接应用，不需调参。通过在训练时对训练数据进行数据增强，可以使网络在光照变化等方面具备较好的鲁棒性。
+% 鲁棒性？
+
+当然，DispNetC算法也存在缺点，其对于细节的预测不够准确，视差不连续处比较模糊。另外作为深度学习算法，其训练时间长，网络模型较大，对计算和存储设备提出了较高的要求，一定程度上限制了其应用场景。
+
+\subsection{KITTI2015上的实验结果}
+Flyingthings3D是人工合成的数据集，与真实场景具有一定的差异，因此我们在训练完成后使用KITTI2015训练集进行网络参数的微调(finetune)，以更好地应用于现实中。微调训练使用前160组图片，共进行200k次迭代；测试使用后40组图片。微调过程中损失函数和误差的变化趋势如图\ref{fig:4_3_kitti_loss}和\ref{fig:4_3_test_error}所示。由于训练集数据量很小，网络在20k次迭代后测试误差已经基本不再下降。
+
+%--------------------- 2张图同一行
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{0.48\textwidth}
+		\centering
+		\includegraphics[width=3in]{figures/4_3_kitti_loss}
+		\caption{KITTI2015上的损失函数变化趋势}\label{fig:4_3_kitti_loss}
+	\end{minipage}
+	\hfill
+	\begin{minipage}[c]{0.48\textwidth}
+		\centering
+		\includegraphics[width=3in]{figures/4_3_kitti_test_error}
+		\caption{KITTI2015上的测试误差变化趋势}\label{fig:4_3_test_error}
+	\end{minipage}
+\end{figure}
+
+类似上一小节，我们同时给出DispNetC、SGM和SPS-St在KITTI数据集上的匹配效果，如图\ref{fig:4_3_kitti_cmp_result}。另外，表\ref{tab:4_3_cmp_kitti}给出了多种匹配算法的误差比较\cite{Menze_2015_CVPR}\cite{陈拓2017CCNN}。本实验训练的DispNetC网络模型的匹配准确度明显优于SGM、AD、BM等算法；而且在运行时间方面，DispNetC远快于其他方法。
+% TODO: 补上数据。% 略差于（还是好于？）SPS-St.  先不跟你比了。。
+
+% 三种算法在kitti上的匹配结果对比图.
+\begin{figure}[!htb]
+	% 一页只能放4组。备选5组：11, 29,31, 32, 97。11和29场景相似，选一个。
+	%>>>>>>>>>>>>>>>>>>>>第1组>>>>>>>>>>>>>>>>>>>>
+	%----------------------第1行-----------------------
+	\begin{minipage}{0.48\linewidth}
+		\centerline{\includegraphics[width=3in]{figures/cmp_kitti/l_029}}
+		\vspace{-10pt}
+		\centerline{左图}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.48\linewidth}
+		\centerline{\includegraphics[width=3in]{figures/cmp_kitti/pred_029}}
+		\vspace{-10pt}
+		\centerline{DispNetC}
+	\end{minipage}
+	\vfill
+	%----------------------第2行----------------------
+	\begin{minipage}{0.48\linewidth}
+		\centerline{\includegraphics[width=3in]{figures/cmp_kitti/sgm_029}}
+		\vspace{-10pt}
+		\centerline{SGM}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.48\linewidth}
+		\centerline{\includegraphics[width=3in]{figures/cmp_kitti/sps_029}}
+		\vspace{-10pt}
+		\centerline{SPS-St}
+	\end{minipage}
+	%<<<<<<<<<<<<<<<<<<<<第1组<<<<<<<<<<<<<<<<<<<<
+	%>>>>>>>>>>>>>>>>>>>>第2组>>>>>>>>>>>>>>>>>>>>
+	%----------------------第1行-----------------------
+	\begin{minipage}{0.48\linewidth}
+		\centerline{\includegraphics[width=3in]{figures/cmp_kitti/l_031}}
+		\vspace{-10pt}
+		\centerline{左图}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.48\linewidth}
+		\centerline{\includegraphics[width=3in]{figures/cmp_kitti/pred_031}}
+		\vspace{-10pt}
+		\centerline{DispNetC}
+	\end{minipage}
+	\vfill
+	%----------------------第2行----------------------
+	\begin{minipage}{0.48\linewidth}
+		\centerline{\includegraphics[width=3in]{figures/cmp_kitti/sgm_031}}
+		\vspace{-10pt}
+		\centerline{SGM}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.48\linewidth}
+		\centerline{\includegraphics[width=3in]{figures/cmp_kitti/sps_031}}
+		\vspace{-10pt}
+		\centerline{SPS-St}
+	\end{minipage}
+	%<<<<<<<<<<<<<<<<<<<<第2组<<<<<<<<<<<<<<<<<<<<
+	%>>>>>>>>>>>>>>>>>>>>第3组>>>>>>>>>>>>>>>>>>>>
+	%----------------------第1行-----------------------
+	\begin{minipage}{0.48\linewidth}
+		\centerline{\includegraphics[width=3in]{figures/cmp_kitti/l_032}}
+		\vspace{-10pt}
+		\centerline{左图}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.48\linewidth}
+		\centerline{\includegraphics[width=3in]{figures/cmp_kitti/pred_032}}
+		\vspace{-10pt}
+		\centerline{DispNetC}
+	\end{minipage}
+	\vfill
+	%----------------------第2行----------------------
+	\begin{minipage}{0.48\linewidth}
+		\centerline{\includegraphics[width=3in]{figures/cmp_kitti/sgm_032}}
+		\vspace{-10pt}
+		\centerline{SGM}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.48\linewidth}
+		\centerline{\includegraphics[width=3in]{figures/cmp_kitti/sps_032}}
+		\vspace{-10pt}
+		\centerline{SPS-St}
+	\end{minipage}
+	%<<<<<<<<<<<<<<<<<<<<第3组<<<<<<<<<<<<<<<<<<<<
+	%>>>>>>>>>>>>>>>>>>>>第4组>>>>>>>>>>>>>>>>>>>>
+%----------------------第1行-----------------------
+\begin{minipage}{0.48\linewidth}
+	\centerline{\includegraphics[width=3in]{figures/cmp_kitti/l_097}}
+	\vspace{-10pt}
+	\centerline{左图}
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\linewidth}
+	\centerline{\includegraphics[width=3in]{figures/cmp_kitti/pred_097}}
+	\vspace{-10pt}
+	\centerline{DispNetC}
+\end{minipage}
+\vfill
+%----------------------第2行----------------------
+\begin{minipage}{0.48\linewidth}
+	\centerline{\includegraphics[width=3in]{figures/cmp_kitti/sgm_097}}
+	\vspace{-10pt}
+	\centerline{SGM}
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\linewidth}
+	\centerline{\includegraphics[width=3in]{figures/cmp_kitti/sps_097}}
+	\vspace{-10pt}
+	\centerline{SPS-St}
+\end{minipage}
+%<<<<<<<<<<<<<<<<<<<<第4组<<<<<<<<<<<<<<<<<<<<
+	\caption{DispNetC, SGM和SPS-St在KITTI2015部分图片上的测试结果}
+\label{fig:4_3_kitti_cmp_result}
+\end{figure}
+
+%三种算法在KITTI2015数据集上的误差对比
+\begin{table}[!htb]
+	\centering
+	\caption{不同匹配算法在KITTI2015数据集上的对比}
+	\label{tab:4_3_cmp_kitti}
+%	\begin{small} %{scriptsize}
+		\begin{tabular}{|c|c|c|c|}\hline
+			方法          & 平均视差误差(px) & 平均错误率(\%) & 运行时间(s) \\\hline
+			%---------------------------------------------------------
+			AD            & 11.56                      & 32.02                 & --      \\
+			CCNN      & 8.50                       & 17.70                  & --      \\
+			OCV-BM &  --                           & 25.27                  &  0.1    \\
+			SGM         & --                            & 10.86                 &  1.1     \\
+			SPS-St    & --                            & 5.31                    & 2         \\
+			DispNetC & 1.37                       & 7.74                   & \textbf{0.06}  \\\hline
+		\end{tabular}
+%	\end{small} %{scriptsize}
+\end{table}
+
+
+\subsubsection{训练集大小对实验结果的影响}
+为了研究训练集大小对实验结果的影响，在微调时分别使用KITTI2015训练数据的20\%、40\%、60\%、80\%(即40、80、120和160组图片)对网络进行训练，在剩余40组图片上进行验证，实验结果见图\ref{fig:4_3_kitti_dataset_size}和表\ref{tab:4_3_kitti_dataset_size}。
+
+%训练集大小对实验结果的影响
+\begin{table}[!htb]
+	\centering
+	\caption{训练集大小对实验结果的影响}
+	\label{tab:4_3_kitti_dataset_size}
+%	\begin{small}
+		\begin{tabular}{|c|c|c|c|}\hline
+			训练数据量 & 平均视差误差(px) & 平均错误率(\%) \\\hline
+			%---------------------------------------------------------
+			40               & 1.9126                   & 11.94                  \\
+			80               & 1.7924                   & 9.60                   \\
+			120             & 1.4898                  & 9.23                    \\
+			160             & 1.3746                  & 7.74                    \\\hline
+		\end{tabular}
+%	\end{small}
+\end{table}
+
+\vspace{1in}
+
+% 不同训练集大小下的测试误差变化趋势
+\begin{figure}[!htb]
+	\centering\includegraphics[width=4in]{figures/4_3_kitti_dataset_size}
+	\caption{不同训练集大小下的测试误差变化趋势}\label{fig:4_3_kitti_dataset_size}
+\end{figure}
+
+
+由表中结果可以得知，训练数据集越大，训练出的网络模型就越好，最终网络的匹配精度就越高。因此，使用更多的真实训练数据是提高匹配准确度的最直接的方法。
+
+%TODO: 网络结构的参数选择/数据增强/光照变化对结果的影响。
 
 %------------------------------------------------------------------------------------
 \section{本章小结}
+本章主要介绍了基于卷积神经网络模型DispNetC的立体匹配。首先详细地介绍了网络基础架构DispNet和加入相关层得到的DispNetC的网络结构，包括收缩部分和扩张部分各网络层的具体参数。接下来阐述了网络的训练方法和相关训练参数设置，之后在FlyingThings3D和KITTI2015数据集上对网络进行了训练和微调，给出了训练完成后的测试结果，并与SGM、SPS-St等算法进行了对比。测试结果表明DispNetC网络模型的匹配精度较高，且运行速度很快，适合应用于旋翼无人机等对实时性要求较高的场景。最后讨论了训练集大小对网络匹配精度的影响，比较结果说明增大训练数据量有利于提高匹配精度。
+
+
+
+
+
+
 
