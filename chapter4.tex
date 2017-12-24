@@ -1,12 +1,99 @@
 % 第四章 基于DispNetC的立体匹配
 
 \chapter{基于DispNetC的立体匹配}
+
+在双目摄像机拍摄某一场景得到的成对图像中，除去部分由于视角差异导致的遮挡区域，两图的公共视野范围内的像素点应该是一一匹配的，每对匹配点是三维空间中同一个点的投影。立体匹配就是在左右图像中寻找这些匹配点，为它们建立一对一的对应关系的过程。立体匹配结束会得到一张视差图，一般使用灰度图，视差图中的每个点的像素值代表参考图像中对应像素点与其目标图像中的匹配点的视差。真实场景中相邻的像素点经常具有相近的颜色，因此为了获得正确的匹配，就必须找到有效的相似度度量的策略；另外，实际场景中，纹理缺失、纹理重复、遮挡、镜面反射、光照强度差异等问题也给立体匹配带来了很大的困难和挑战。
+
+\begin{figure}[!htb]
+	\centering\includegraphics[width=5in]{figures/4_0_stereo_correspondence}
+	\caption{立体匹配示意图}\label{fig:4_0_stereo_correspondence}
+\end{figure}
+
 % ref: FlowNet paper ch2, Convolutional Networks part.
 2012年Krizhevsky等人的工作\cite{krizhevsky2012imagenet}展示了卷积神经网络在大规模图像分类中的良好效果，带动了应用CNN到各种计算机视觉任务中的研究工作。深度卷积神经网络较传统神经网络而言，能够学习到更为复杂的非线性关系，因此能够更好地从大量数据中提取规律。同时其通过卷积操作获得的特征也比人工设计的特征更为有效。
 
 过去几年涌现出了大量使用CNN进行立体匹配的研究成果。KITTI\cite{Menze_2015_CVPR} Stereo Evaluation排行榜的前列已被基于卷积神经网络的算法占领，此类算法在匹配精度和运行时间方面较传统方法都展现出了很明显的优势。Fisher等人\cite{fischer2014descriptor}从通过有监督/无监督训练得到的CNN中提取特征表达，并基于欧氏距离对这些特征进行匹配。Zbontar和LeCun\cite{zbontar2016stereo}训练了一个连体(Siamese)架构的CNN，用来预测图像块之间的相似度。这类基于图像块(patch)的算法的缺点是计算量较大，无法利用全局信息，在计算完匹配代价后仍然需要进行后处理操作，因此并不能显著降低算法的运行时间。
 
-DispNet\cite{mayer2016large}是一种网络结构较为简单、端到端(end-to-end)的立体匹配网络。该网络的运行速度很快，适合应用于无人机等对实时性有较高要求的场景。本章介绍DispNet的网络结构、训练过程并给出使用其进行立体匹配的结果。
+DispNet\cite{mayer2016large}是一种网络结构较为简单、端到端(end-to-end)的立体匹配网络。该网络的运行速度很快，适合应用于无人机等对实时性有较高要求的场景。本章首先简要梳理传统立体匹配算法，然后介绍DispNet的网络结构、训练过程，并给出使用其进行立体匹配的结果。
+
+
+%------------------------------------------------------------------------------------
+\section{传统立体匹配算法简介}
+% ref: Robust and real-time stereo matching on parallel graphics hardware...[phd], ch3.2, p83;
+% 陈拓ch2.4, p29; 苏东ch2.2.2, p25.
+Scharstein\cite{Scharstein2002}对立体匹配领域做了详细的综述，将传统的立体匹配算法分为三类：通过限制搜索像素范围来找到局部最优视差的局部算法；通过定义全局能量函数来得到平滑视差图的全局算法；以及混合了局部与全局算法思想，或不能归类为局部或全局方法的其他算法。
+
+\subsection{全局立体匹配算法}
+全局立体匹配算法基于一个能量最小化框架，其寻找使全局能量函数$E(D)$达到最小的视差D：
+%
+\begin{equation}\label{eq:4_0_energy_function}
+E(D) = E_{data}(D) + \lambda E_s(D)
+\end{equation}
+其中，数据项$E_{data}(D)$描述匹配的代价，平滑项$E_s(D)$显式地引入了对视差变化的平滑约束。$\lambda$是用于平衡数据项和平滑项的比例系数。数据项是整个图像内匹配代价的累计，一般定义为整个匹配集合内每个像素的基于某种差异度量的代价之和：
+%
+\begin{equation}\label{eq:4_0_energy_function_data_term}
+D_{data}(D) = \sum_{p} C(\mathbf{p}, D(\mathbf{p}))
+\end{equation}
+式中，$C(\mathbf{p}, D(\mathbf{p}))$代表任意一种像素差异度量，用于计算参考图像中点$\mathbf{p} = (x,y)$与目标图像中的匹配点$(x-D(\mathbf{p}),y)$之间的代价。常用的差异性度量有以下几种：
+
+绝对差值和：
+\[ SAD(x,y,d) = \sum_{(i,j) \in N} |I_r(x+i, y+j) - I_o(x+i-d, y+j)|  \]
+
+截断绝对差值和：
+\[ STAD(x,y,d) = \sum_{(i,j) \in N} min \{ |I_r(x+i, y+j) - I_o(x+i-d, y+j)|  , T \} \]
+
+差值平方和：
+\[ SSD(x,y,d) = \sum_{(i,j) \in N} |I_r(x+i, y+j) - I_o(x+i-d, y+j)|^2  \]
+
+归一化互相关：
+\[ NCC(x,y,d) = \frac{\sum_{(i,j)\in N} I_r(x+i, y+j)  I_o(x+i-d, y+j) }
+{\sqrt   {\sum_{(i,j) \in N} I_r^2(x+i,y+j)  \sum_ {(i,j) \in N} I_o^2(x+i-d, y+j) } }  \]
+
+Census:
+\[  Census = \sum_ {(i,j) \in N} HAMMING(I_r(x+i,y+j), I_o(x+i-d, y+j))   \]
+式中$I_r$和$I_o$分别表示参考图像和目标图像中的像素灰度值，$N$为窗口范围。前三种匹配代价的时间复杂度为$O(w\times h \times N)$，可以利用积分图像（Integral Image）或箱式滤波（Box Filtering）等方法将时间复杂度降为$O(w \times h)$。
+
+平滑项$E_s(D)$起到正则化的作用，作为惩罚函数来限制局部范围内出现大的视差变动。出于计算方面的考虑，惩罚函数的范围一般被限制在像素点四个直接相邻的邻域$N_4(\mathbf{p})$内，对于点$\mathbf{p}=(x,y)$，$N_4(\mathbf{p}) = \{ (x \pm 1, y), (x, y \pm 1) \}$。 类似于数据项的代价积累，平滑项惩罚并积累相邻像素的视差变化：
+\[  E_s(D) = \sum_{\mathbf{p}} \sum_{\mathbf{q} \in N_4(\mathbf{p})} s(\mathbf{p}, \mathbf{q})    \]
+$s(\mathbf{p}, \mathbf{q})$表示对相邻像素点$\mathbf{p}$和$\mathbf{q}$的惩罚。
+
+最小化式\ref{eq:4_0_energy_function}中的能量函数被证明为NP困难问题\cite{boykov2001fast}，不存在多项式时间内求得最优解的算法，因此一般使用近似算法来寻找最优解附近的次优解。近似算法包括图割\cite{boykov2001fast}、置信传播\cite{sun2003stereo}、动态规划\cite{VanMeerbergen2002}等等。
+
+\subsection{局部立体匹配算法}
+局部立体匹配算法是基于窗口的方法，其不使用最小化全局能量函数的框架，而是采用一种称为“赢者通吃”（Winner Takes All）的视差选择策略。对于像素点$\mathbf{p}$，局部算法会遍历设置好的视差搜索范围，取损失最小的视差作为最终的匹配：
+%
+\begin{equation} \label{eq:4_0_local_WTA}
+D(\mathbf{p}) = \arg \min_d C(\mathbf{p}, d)
+\end{equation}
+注意到上式中并未加入任何平滑约束。基于像素的代价计算会导致获得的视差图中带有很多噪声，并且不能正确匹配有歧义的像素点。为了获得更加可靠的代价，局部立体匹配算法通常会在计算视差前对代价进行累计，累计后的代价是相邻像素代价的加权和。代价累计可以视为一种滤波器：
+%
+\begin{equation} \label{eq:4_0_local_cost_aggregation}
+C(\mathbf{p}, d)' = W(\mathbf{p}) * C(\mathbf{p}, d)
+\end{equation}
+$C(\mathbf{p}, d)' $是累计后的代价，$C(\mathbf{p}, d)$是各像素的代价，$W(\mathbf{p})$表示点$\mathbf{p}$的“支持窗口”，即一个包含滤波器系数的任意形状和尺寸的窗口。类似于全局方法中的平滑项，代价聚合使得局部方法也能够在匹配过程中加入对平滑的考虑。
+
+最简单的代价聚集使用固定大小和形状的窗口，通常使用一个矩形，并假设窗口内的所有像素点具有相同的视差。这个假设是基于视差平滑约束做出的，但窗口尺寸与代价的聚集之间存在矛盾：窗口尺寸太小，则代价聚集作用不明显，鲁棒性差；而窗口尺寸如果太大，在视差不连续处，窗口内像素点视差相同的假设是不成立的，因此也无法获得较好的结果。因而固定窗口的代价聚集精度不高，但计算比较容易，实时性较好。OpenCV中提供了这种方法的实现，称为块匹配算法（block matching）。
+
+支持窗口可在不同像素点处取不同的尺寸、形状和权重，而这些参数的选择对于保存视差图中的边缘信息非常重要。Veksler\cite{veksler2003fast}提出了自适应窗口尺寸的算法，其使用积分图像的方法从一系列包含感兴趣像素点的不同尺寸的方形窗口中选取最佳的窗口，该方法能够显著地改善获得的视差图的局部平滑性，但其在视差不连续处的精度仍十分有限。Yoon和Kweon\cite{yoon2005locally}提出了自适应支持窗口权重的算法，这种方法极大地提高了局部算法在物体边界处的视差精度，获得了可与部分全局算法相比的匹配效果。
+
+基于十字形（Cross-based）的代价聚合算法\cite{zhang2009cross}是一种自适应窗口形状和尺寸的方法，该方法既利用了感兴趣像素点与其邻域内像素点的像素距离，也利用了它们之间的像素值差异，生成的支持窗口形状并不规则，实时性较好，得到了比较多的应用。
+% 陈拓p30还有两段基于双边滤波和基于分割的代价聚合算法。
+% <Robust and real-time stereo matching on parallel graphics hardware using gradient-based disparity refinement> p93, 3.2.3 other approaches讲到SGM，陈拓p29全局算法也讲到SGM。按说实验与SGM做了比较，应该介绍一下。。
+% TODO: 如果绪论不够，这篇英文博士论文可以抄一抄。
+\subsection{其他立体匹配算法}
+还有一些立体匹配方法将全局方法与局部方法的思想结合起来，使用非局部的代价聚合策略来扩展基于“赢者通吃”策略的匹配算法，在获得较好的匹配效果的同时，保持了相对较低的计算复杂度。这类算法中最著名的是半全局匹配算法（SGM）\cite{Hirschmuller08}。SGM使用了基于动态规划的代价聚合策略，在16个方向上使用一维动态规划进行代价累计然后求和，从而得到近似二维优化的效果。该算法在现实中得到了广泛的应用。
+
+
+%------------------------------------------------------------------------------------
+% TODO: 立体匹配步骤这一小节要不要？
+%\subsection{立体匹配步骤}
+%% ref: 陈拓ch2.2.3, p26.
+%Scharstein\cite{Scharstein2002}通过对各种立体匹配算法进行研究，将传统立体匹配算法归为以下四个步骤：
+%
+%（1）匹配代价计算
+
+
+
 
 %------------------------------------------------------------------------------------
 \section{DispNet网络结构}
@@ -15,7 +102,7 @@ DispNet是一种端到端的立体匹配卷积神经网络模型。所谓“端�
 
 在卷积神经网络中，池化对于降低训练网络的训练量是必要的，而且能够使得网络具备聚合输入图像中更大范围信息的能力。但是池化会导致分辨率下降，为了获得稠密的与输入图像具有相同分辨率的预测结果，我们需要对池化后得到的粗糙结果进行细化。因此DispNet网络的结构呈沙漏形（如图\ref{fig:4_1_dispnet_shape}），包含一个收缩部分和一个扩张部分，整个网络作为一个整体，使用反向传播算法来训练。
 
-\begin{figure}[!htbp]
+\begin{figure}[!htb]
 	\centering\includegraphics[width=3.5in]{figures/4_1_dispnet_shape.png}
 	\caption{沙漏型的网络结构\cite{dosovitskiy2015flownet}}\label{fig:4_1_dispnet_shape}
 \end{figure}
@@ -32,7 +119,7 @@ DispNet的收缩部分包括10个卷积层，其中前两个卷积层的卷积�
 
 另一种处理方式是建立两个相互独立但相同的结构来分别处理输入的左右图，之后通过一定方式将它们组合起来，如图\ref{fig:4_1_DispNetC}所示。网络首先分别从两张图片生成一些有价值的特征表达，然后在更高级别将它们联系起来。这种结构有些类似于传统的匹配模式：首先从两张图片的小块区域中提取特征，然后比较获得的特征向量。
 
-\begin{figure}[!htbp]
+\begin{figure}[!htb]
 	\centering\includegraphics[width=6in]{figures/4_1_dispnetc_architecture}
 	\caption{DispNetC网络架构}\label{fig:4_1_DispNetC}
 \end{figure}
@@ -54,7 +141,7 @@ c(\mathbf{x}_1, \mathbf{x}_2) = \sum_{\mathbf{o} \in [-k, k] \times [-k, k]} { \
 \subsubsection{扩张部分}
 扩张部分的主要结构是上卷积层(upconvolutional layer)，由去池化(unpooling，与池化相对)和卷积组成。这种网络层已被多次使用过\cite{zeiler2011adaptive, zeiler2014visualizing, goodfellow2014generative}。为了获得精细的预测结果，我们对特征图应用上卷积，并将其和收缩部分中对应的特征图、以及上一层的较粗糙的预测结果拼接起来。这样既保留了从更粗糙的特征图传递过来的高级信息，也保留了更低网络层的特征图提供的精细局部信息。每一次上卷积使预测结果的分辨率增加一倍，一共重复4次上卷积，最终得到的预测结果的分辨率是输入图像的四分之一，宽度和高度都是原图的一半。对网络输出的结果使用插值方法即可获得与输入图像相同的分辨率。根据\cite{dosovitskiy2015flownet}的实验，继续增加上卷积层来细化预测结果相比使用双线性插值方法并不能显著提高预测精度，但由于视差必须取整数，我们使用最近邻插值来得到输入分辨率的结果。扩张部分的结构如图\ref{fig:4_1_DispNet_expanding_part}所示。
 
-\begin{figure}[!htbp]
+\begin{figure}[!htb]
 	\centering\includegraphics[width=6in]{figures/4_1_dispnet_expanding_part.png}
 	\caption{DispNetC扩张部分结构}\label{fig:4_1_DispNet_expanding_part}
 \end{figure}
@@ -589,7 +676,7 @@ Flyingthings3D是人工合成的数据集，与真实场景具有一定的差异
 
 %------------------------------------------------------------------------------------
 \section{本章小结}
-本章主要介绍了基于卷积神经网络模型DispNetC的立体匹配。首先详细地介绍了网络基础架构DispNet和加入相关层得到的DispNetC的网络结构，包括收缩部分和扩张部分各网络层的具体参数。接下来阐述了网络的训练方法和相关训练参数设置，之后在FlyingThings3D和KITTI2015数据集上对网络进行了训练和微调，给出了训练完成后的测试结果，并与SGM、SPS-St等算法进行了对比。测试结果表明DispNetC网络模型的匹配精度较高，且运行速度很快，适合应用于旋翼无人机等对实时性要求较高的场景。最后讨论了训练集大小对网络匹配精度的影响，比较结果说明增大训练数据量有利于提高匹配精度。
+本章主要介绍了基于卷积神经网络模型DispNetC的立体匹配。首先简要梳理了传统立体匹配算法，然后详细地介绍了网络基础架构DispNet和加入相关层得到的DispNetC的网络结构，包括收缩部分和扩张部分各网络层的具体参数。接下来阐述了网络的训练方法和相关训练参数设置，之后在FlyingThings3D和KITTI2015数据集上对网络进行了训练和微调，给出了训练完成后的测试结果，并与SGM、SPS-St等算法进行了对比。测试结果表明DispNetC网络模型的匹配精度较高，且运行速度很快，适合应用于旋翼无人机等对实时性要求较高的场景。最后讨论了训练集大小对网络匹配精度的影响，比较结果说明增大训练数据量有利于提高匹配精度。
 
 
 
