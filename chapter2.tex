@@ -1,6 +1,11 @@
-% 第二章 双目立体视觉理论基础
+% 第二章 摄像机模型与标定
 
 \chapter{双目立体视觉理论基础}
+立体视觉是计算机视觉领域的一个重要分支，其目的在于利用二维图像信息来重构场景的三维几何信息。
+立体视觉的研究可大致分为三类：直接使用测距仪器（如激光测距仪）获得距离，建立三维描述；利用单幅图像推断三维信息；利用两幅或多幅图像重构三维结构等。
+双目立体视觉（binocular stereo vision）属于第三类，其模拟人类的两只眼睛获取图像并感知深度的原理。基于双目立体视觉的测量方法具有效率高、结构简单、成本低等优点，可以应用于移动机器人、无人机、自动驾驶汽车的导航系统，航空及遥感测量，工业自动化中的检测、定位等场景，具有广泛且巨大的应用价值。
+本章介绍双目立体视觉的基础理论知识，建立摄像机的数学模型，并完成双目相机的标定实验，
+
 %------------------------------------------------------------------------------------
 \section{摄像机模型}
 \subsection{常用坐标系定义及变换}
@@ -233,241 +238,7 @@ y' &= y + \sigma_y(x,y)
 \end{equation}
 
 
-%------------------------------------------------------------------------------------
-\section{摄像机标定}
-% ref: 王德海，时洪光，尚倩， 吴哲岑，王莹
-摄像机标定就是确定其内部参数和外部参数的过程。对于双目摄像机，标定分为两步：首先分别标定两个相机得到其内部参数，然后再求解它们之间的相对位置关系，即旋转矩阵和平移向量。
 
-\subsection{单目摄像机标定}
-摄像机标定方法主要可分为传统标定方法和自标定方法。传统标定方法\cite{李小平2008双目视觉立体测量研究}又称为强标定，一般需要在摄像机前放置一个标定参照物，摄像机拍摄标定物后获得标定物上特征点在图像上的坐标，同时在世界坐标系下测量标定物特征点的坐标，利用图像坐标系下和世界坐标系下坐标的对应关系，借助非线性优化方法计算摄像机的内外参数\cite{时洪光2010基于双目视觉的运动目标定位研究}。自标定方法\cite{李洪海2007摄像机标定技术研究}由Faugerasa等人提出，仅利用图像间成像点的对应关系就可以得到摄像机参数\cite{王德海2016基于双目立体视觉的目标识别与抓取定位}。
-
-传统标定方法标定精度较高，但计算复杂且需要标定模板；自标定方法操作简便灵活，但鲁棒性差、精度低。张正友于1999年提出了一种介于传统标定和自标定方法之间的新方法\cite{zhang1999flexible}，只需要一个平面的标定板，操作简单，鲁棒性好，精度较高，近年来被广泛应用。本文使用这种方法进行摄像机的标定。
-
-张正友标定法的基本思想是：摄像机的外部参数变化而内部参数恒定，使用一个确定规格的标定板从不同角度进行拍摄，每张图像可以用来确定一个单应性(Homography)，能提供8个方程，同时引入了6个未知量（三维空间的旋转和平移），故得到2个约束条件。使用多张图片即可求解所有内参值。具体算法原理如下。
-
-%（1）建立摄像机的几何模型
-
-设空间中任一点$\mathbf{P}$在图像坐标系和世界坐标系下的坐标分别为$\mathbf{m}=[u,v]^T$和$\mathbf{M}=[X, Y, Z]^T$，齐次坐标形式为$\tilde{\mathbf{m}} = [u,v,1]^T$和$\tilde{\mathbf{M}} = [X,Y,Z,1]^T$。对于线性模型，二者具有如下关系：
-%
-\begin{equation}\label{eq:2_2_mono_calib_0}
-s \tilde{\mathbf{m}} = \mathbf{A} [ \mathbf{R}  \quad  \mathbf{t} ] \tilde{\mathbf{M}}
-\end{equation}
-其中，$s$为尺度因子，$\mathbf{R}$和$\mathbf{t}$为摄像机的外参，$\mathbf{A}$为摄像机内参矩阵。相较上一节中建立的线性模型，Zhang\cite{zhang2000flexible}在模型中多考虑了相机两个轴之间的倾斜，因此$\mathbf{A}$表示为：
-%
-\begin{equation}\label{eq:2_2_mono_calib_1}
-\mathbf{A}=
-\left[ \begin{array}{ccc}
-\alpha_x & \gamma & u_0 \\
-0 & \alpha_y & v_0 \\
-0 & 0 & 1
-\end{array} \right]
-\end{equation}
-$\gamma$描述相机两个轴之间非严格正交所造成的影响，其余参数的定义与上一节线性模型中的定义相同。
-为了简化问题，我们假定标定板图像所在平面与世界坐标系中$X_wOY_w$平面重合，故所有点的坐标$Z=0$。使用$\mathbf{r_i}$表示矩阵$\mathbf{R}$的第$i$列，则式\ref{eq:2_2_mono_calib_0}可简化为：
-%
-\begin{equation}\label{eq:2_2_mono_calib_2}
-s
-\begin{bmatrix}
-u \\ v \\ 1
-\end{bmatrix}
-= \mathbf{A} \hspace{2pt}  [ \mathbf{r_1} \quad \mathbf{r_2} \quad \mathbf{r_3} \quad \mathbf{t} ]
-\begin{bmatrix}
-X \\ Y \\ 0 \\ 1
-\end{bmatrix}
-= \mathbf{A} \hspace{2pt}  [ \mathbf{r_1} \quad\mathbf{r_2} \quad \mathbf{t} ]
-\begin{bmatrix}
-X \\ Y \\ 1
-\end{bmatrix}
-\end{equation}
-
-从而，点$\mathbf{P}$在两个坐标系下的坐标变换可以用单应性矩阵$\mathbf{H}$来表示：
-%
-\begin{equation}\label{eq:2_2_mono_calib_3}
-s \tilde{\mathbf{m}} = \mathbf{H} \tilde{\mathbf{M}}
-\end{equation}
-其中，$\mathbf{H} = \mathbf{A} [ \mathbf{r_1} \quad \mathbf{r_2} \quad \mathbf{t} ]$是$3\times 3$的矩阵。令$\mathbf{H} = [\mathbf{h_1}, \mathbf{h_2}, \mathbf{h_3}]$，那么
-%
-\begin{equation}\label{eq:2_2_mono_calib_4}
-[\mathbf{h_1} \quad \mathbf{h_2} \quad \mathbf{h_3}]
-= \lambda \mathbf{A} [ \mathbf{r_1} \quad \mathbf{r_2} \quad \mathbf{t} ]
-\end{equation}
-$\lambda$是一个常数。由于$\mathbf{R}$是正交矩阵，其列向量$\mathbf{r_1}$与$\mathbf{r_2}$相互正交，故有
-%
-\begin{equation}\label{eq:2_2_mono_calib_5}
-\left\{
-\begin{aligned}
-\mathbf{h}_1^T\mathbf{A}^{-T}\mathbf{A}^{-1}\mathbf{h}_2 &= 0 \\
- \mathbf{h}_1^T\mathbf{A}^{-T}\mathbf{A}^{-1}\mathbf{h}_1 &= \mathbf{h}_2^T\mathbf{A}^{-T}\mathbf{A}^{-1}\mathbf{h}_2 
-\end{aligned}
-\right.
-\end{equation}
-式\ref{eq:2_2_mono_calib_5}表示的是一个单应性对摄像机内部参数施加的两个约束。单应性矩阵有8个自由度，但额外引入了6个外部参数（三维空间的旋转和平移），因此只能得到两个约束条件。要求解所有的内部参数，需要使用多个单应性的信息。
-
-令
-%
-\begin{equation}\label{eq:2_2_mono_calib_6}
-\begin{split}
-\mathbf{B} = \mathbf{A}^{-T} \mathbf{A}^{-1} \equiv
-\begin{bmatrix}
-B_{11} & B_{12} & B_{13} \\
-B_{21} & B_{22} & B_{23} \\
-B_{31} & B_{32} & B_{33} \\
-\end{bmatrix} \hspace{1.5in}
-\\
-=
-\begin{bmatrix}
-	\frac{1}{\alpha_x^2} &
-	 -\frac{\gamma}{\alpha_x^2 \alpha_y} &
-	 \frac{v_0\gamma - u_0 \alpha_y}{\alpha_x^2 \alpha_y} \\
-	-\frac{\gamma}{\alpha_x^2 \alpha_y} &
-	 \frac{\gamma^2}{\alpha_x^2 \alpha_y^2} + \frac{1}{\alpha_y^2} &
-	  -\frac{\gamma(v_0 \gamma - u_0 \alpha_y)}{\alpha_x^2 \alpha_y^2} - \frac{v_0}{\alpha_y^2} \\
-	\frac{v_0 \gamma - u_0 \alpha_y}{\alpha_x^2 \alpha_y} &
-	 -\frac{\gamma (v_0 \gamma - u_0 \alpha_y)}{\alpha_x^2 \alpha_y^2} - \frac{v_0}{\alpha_y^2} &
-	 \frac{ (v_0 \gamma - u_0 \alpha_y)^2 }{\alpha_x^2 \alpha_y^2} + \frac{v_0^2}{\alpha_y^2} + 1
-\end{bmatrix}
-\end{split}
-\end{equation}
-注意到$\mathbf{B}$是对称阵，可以定义一个6维向量来表示：
-%
-\begin{equation}\label{eq:2_2_mono_calib_7}
-\mathbf{b} = [B_{11}, B_{12}, B_{22}, B_{13}, B_{23}, B_{33}]^T
-\end{equation}
-
-令$\mathbf{H}$的第$i$列为$\mathbf{h_i} = [h_{i1}, h_{i2}, h_{i3}]^T$，则有
-%
-\begin{equation}\label{eq:2_2_mono_calib_8}
-\mathbf{h}_I^T \mathbf{B} \mathbf{h}_j = \mathbf{v}_{ij}^T \mathbf{b}
-\end{equation}
-其中，$\mathbf{v}_{ij} = [h_{i1} h_{j1}, h_{i2} h_{j2} + h_{i2} h_{j1}, h_{i2} h_{j2}, h_{i3} h_{j1} +h_{i1} h_{j3}, h_{i3} h_{j2} + h_{i2} h_{j3}, h_{i3} h_{j3}]^T$。
-从而两个约束方程\ref{eq:2_2_mono_calib_5}可以改写为$\mathbf{b}$的齐次方程组：
-%
-\begin{equation}\label{eq:2_2_mono_calib_9}
-\begin{bmatrix}
-\mathbf{v}_{12}^T \\ (\mathbf{v}_{11} - \mathbf{v}_{22})^T
-\end{bmatrix}
-\mathbf{b} = \mathbf{0}
-\end{equation}
-
-对标定板的$n$幅图片，则联立$n$个方程组\ref{eq:2_2_mono_calib_9}为
-%
-\begin{equation}\label{eq:2_2_mono_calib_10}
-\mathbf{Vb} = \mathbf{0}
-\end{equation}
-$\mathbf{V}$是一个$2n \times 6$的矩阵。如果$n \geq 3$，我们可以得到$\mathbf{b}$的唯一解；如果$n = 2$，我们可以令$\gamma=0$，从而得到唯一解；如果$n=1$，则我们只能假设一部分内参数已知来求解另外2个内参数。方程组\ref{eq:2_2_mono_calib_10}的解是$\mathbf{V}^T\mathbf{V}$最小特征值对应的特征向量。
-
-在求得$\mathbf{b}$之后，即可通过以下公式来计算摄像机所有的内部参数：
-%
-\begin{equation}\label{eq:2_2_mono_calib_11}
-	\left\{ 
-	\begin{aligned}
-		v_0 &= (B_{12}B_{13}-B_{11}B_{23}) / (B_{11}B_{22} - B_{12}^2) \\
-		\lambda &= B_{33} - [B_{13}^2 + v_0 (B_{12}B_{13} - B_{11}B_{23})] / B_{11} \\
-		\alpha_x &= \sqrt{\lambda / B_{11}} \\
-		\alpha_y &= \sqrt{\lambda B_{11} / (B_{11}B_{22} - B_{12}^2)} \\
-		\gamma &= -B_{12}\alpha_x^2 \alpha_y / \lambda \\
-		u_0 &= \gamma v_0 / \alpha_x - B_{13} \alpha_x^2 / \lambda
-	\end{aligned}
-	\right.
-\end{equation}
-
-得到$\mathbf{A}$后即可利用下式计算外部参数：
-%
-\begin{equation}\label{eq:2_2_mono_calib_12}
-	\mathbf{r}_1 = \lambda \mathbf{A}^{-1}\mathbf{h}_1, \quad
-	\mathbf{r}_2 = \lambda \mathbf{A}^{-1}\mathbf{h}_2, \quad
-	\mathbf{r}_3 = \mathbf{r}_1 \times \mathbf{r}_2, \quad
-	\mathbf{t} = \lambda \mathbf{A}^{-1}\mathbf{h}_3
-\end{equation}
-$\lambda = 1/||\mathbf{A}^{-1}\mathbf{h}_1||$。一般计算得到的矩阵$\mathbf{R}$并不满足旋转矩阵的性质，可以使用奇异值分解等方法获得更好的解。
-
-由于拍摄图片中存在噪声，提取的角点会存在误差，可以通过最小化式\ref{eq:2_2_mono_calib_13}中的目标函数来得到各角点坐标的最大似然估计：
-%
-\begin{equation}\label{eq:2_2_mono_calib_13}
-\sum_{i=1}^{n} \sum_{j=1}^{m}|| \mathbf{m}_{ij} - \hat{\mathbf{m}}(\mathbf{A}, \mathbf{R}_i, \mathbf{t}_i, \mathbf{M}_j) ||^2
-\end{equation}
-式中，$\hat{\mathbf{m}}(\mathbf{A}, \mathbf{R}_i, \mathbf{t}_i, \mathbf{M}_j)$表示点$\mathbf{M}_j$在图像$i$中的投影。该非线性最小化问题可利用Levenberg-Marquardt算法迭代求解，使用前面的结果作为初值。优化时中可以加入畸变项以得到畸变参数。
-
-%------------------------------------------------------------------------------------
-\subsection{双目摄像机标定}
-% ref: 王德海，王莹，邓国栋，时洪光. 都是一样的公式。
-双目摄像机标定是在完成两个单目摄像机标定的基础上，求解它们之间的旋转矩阵$R$和平移向量$t$的过程。
-设左右相机的外部参数分别为$(\mathbf{R}_1, \mathbf{t}_1)$和$(\mathbf{R}_2, \mathbf{t}_2)$，世界坐标系下某点$\mathbf{x}_w$在两个摄像机坐标系下的分别表示为$\mathbf{x}_l$和$\mathbf{x}_r$，则
-%
-\begin{equation}\label{eq:2_2_binono_calib_0}
-\mathbf{x}_l = \mathbf{R}_l + \mathbf{t}_l, \quad \mathbf{x}_r = \mathbf{R}_r + \mathbf{t}_r
-\end{equation}
-
-联立两式，消去$\mathbf{x}_w$，得到$\mathbf{x}_l$和$\mathbf{x}_r$的关系为
-%
-\begin{equation}\label{eq:2_2_binono_calib_1}
-\mathbf{x}_r = \mathbf{R}_r \mathbf{R}_l^{-1}\mathbf{x}_l +
- ( \mathbf{t}_r - \mathbf{R}_r \mathbf{R}_l^{-1}\mathbf{t}_l )
-\end{equation}
-
-从而可知两摄像机之间的旋转和平移关系分别为
-%
-\begin{equation}\label{eq:2_2_binono_calib_2}
-\mathbf{R} = \mathbf{R}_r \mathbf{R}_l^{-1},  \quad
-\mathbf{t} =  \mathbf{t}_r -  \mathbf{R}_r  \mathbf{R}_l^{-1} t_l
-\end{equation}
-
-%------------------------------------------------------------------------------------
-\subsection{标定结果}
-实验使用的摄像机为ZED双目相机，分辨率设置为720p($1280\times 720$)。标定板上的图案为棋盘格，每个方格的边长为$10cm$，共有$7 \times 6$个方格，故每行有6个角点，每列有5个角点。使用ZED相机在室外采集了31组图片，部分标定图像如图\ref{fig:2_2_calib_imgs}所示。
-
-\begin{figure}[!htb] %部分标定图片
-	\centering
-	\begin{minipage}[c]{0.48\textwidth}
-		\centering
-		\includegraphics[width=3in]{figures/2_2_calib/left_4x3}
-		\centerline{\small{左摄像机采集图片}}
-	\end{minipage}
-	\hfill
-	\begin{minipage}[c]{0.48\textwidth}
-		\centering
-		\includegraphics[width=3in]{figures/2_2_calib/right_4x3}
-		\centerline{\small{右摄像机采集图片}}
-	\end{minipage}
-	\caption{部分标定图片}\label{fig:2_2_calib_imgs}
-\end{figure}
-
- 分别使用基于OpenCV 2.4.13编写的C++程序和MATLAB双目相机标定工具箱进行了标定操作。经过多次试验，发现OpenCV标定的结果中畸变参数变化很大，结果并不可靠，故在此只给出使用Matlab标定工具箱得到的结果。由于采集图像时光线较暗，标定工具箱共接受了31组图片中的15组，标定结果如表\ref{tab:2_2_calib_result}所示，平均重投影误差(mean reprojection error)为$0.1262$， 各组图片的重投影误差情况见图\ref{fig:2_2_reprojection_errors}。
- 
- \begin{table}[!htb] %ZED双目相机标定结果
-	\centering
- 	\caption{ZED双目相机标定结果}\label{tab:2_2_calib_result}
- 	\begin{small}
- 	\begin{tabular}{ccc|c} \toprule[2pt]
- 		内参数                  & 左相机          & 右相机 & 外参数 \\ \midrule[1pt]
- 		$\alpha_x$         & 701.9830   & 703.6765  &
- 		\multirow{4}*{$ \mathbf{R} = \left[ \begin{tabular}{ccc}
- 			0.9999 & -1.8511e-04 & -0.0108 \\
- 			6.8373e-05 & 0.9999 & -0.0108 \\
- 			0.0108 & 0.0108 & 0.9999 \end{tabular} \right] $}\\
- 		$\alpha_y$         & 701.7472    & 703.3212 & \\
- 		$u_0$                  & 604.6113   & 618.4235 & \\
- 		$v_0$                  & 366.4776  & 346.8419 & \\
- 		畸变系数$k_1$   & -0.1603     & -0.1648 &
- 		 \multirow{2}*{$\mathbf{t}=[-120.1123 \quad 0.1007 \quad 2.0492]^T$} \\
- 		畸变系数$k_2$   & 0.0138       & 0.0174 & \\ \bottomrule[2pt]
- 	\end{tabular}
- 	\end{small}
- \end{table}
-
-\begin{figure}[!htb] %标定重投影误差
-	\centering
-	\includegraphics[width=5in]{figures/2_2_reprojection_errors}
-	\caption{重投影误差}\label{fig:2_2_reprojection_errors}
-\end{figure}
-
-\begin{figure}[!htb] %标定图像的三维位置
-		\centering
-		\includegraphics[width=5in]{figures/2_2_extrinsics}
-		\caption{标定图像的三维位置}\label{fig:2_2_extrinsics}
-\end{figure}
-
- 
 %------------------------------------------------------------------------------------
 \section{双目立体视觉原理}
 
@@ -615,7 +386,13 @@ Z_c = \frac{B\cdot f}{d}
 %------------------------------------------------------------------------------------
 \subsection{立体校正}
 % ref: 白鹏，学习opencv.
-对于平行光轴视觉模型，极线与图像坐标系的水平轴平行，而左右图像是行对齐的，从而沿极线的搜索即沿目标图像中对应行的搜索。但是平行光轴视觉模型只是一个理想模型，现实中的摄像机几乎不可能实现严格的平行对准。立体校正（stereo rectification）的目的是通过对两台摄像机的成像平面进行重投影，使它们落在同一个平面内，并且满足行对齐。Hartley\cite{hartley1999theory}、Tsai\cite{tsai1987versatile}等人提出了不同的立体校正算法，Bouguet对Tsai的算法进行了简化并开发了MATLAB摄像机标定工具箱，下面简要介绍Bouguet算法。
+对于平行光轴视觉模型，极线与图像坐标系的水平轴平行，而左右图像是行对齐的，从而沿极线的搜索即沿目标图像中对应行的搜索。但是平行光轴视觉模型只是一个理想模型，现实中的摄像机几乎不可能实现严格的平行对准。立体校正（stereo rectification）的目的是通过对两台摄像机的成像平面进行重投影，使它们落在同一个平面内，并且满足行对齐，如图\ref{fig:2_3_stereo_rectification}。Hartley\cite{hartley1999theory}、Tsai\cite{tsai1987versatile}等人提出了不同的立体校正算法，Bouguet对Tsai的算法进行了简化并开发了MATLAB摄像机标定工具箱，下面简要介绍Bouguet算法。
+
+\begin{figure}[!htb] %立体校正示意图
+	\centering
+	\includegraphics[width=4in]{figures/2_3_stereo_rectification}
+	\caption{立体校正示意图}\label{fig:2_3_stereo_rectification}
+\end{figure}
 
 Bouguet算法的思想是使图像变化最小（从而使重投影畸变最小化），同时使两图的公共可视面积最大化的重投影\cite{bradski2008learning}。给定左右摄像机之间的旋转矩阵$\mathbf{R}$和平移向量$\mathbf{t}$，首先将旋转矩阵$\mathbf{R}$平分为两部分$\mathbf{r_l}$和$\mathbf{r_r}$，每个摄像机旋转一半，从而使两个成像平面平行。之后，利用极点的方向构造另一个旋转矩阵$R_{rect}$将左极点变换到无穷远处，并使极线与成像平面的水平轴平行。以主点$(c_x, c_y)$为左图像原点，指向极点的单位向量与两摄像机射影中心的平移向量方向一致：
 %
@@ -676,10 +453,266 @@ X \\ Y \\ Z \\ W
 \end{equation}
 三维坐标为$(X/W, Y/X, Z/W)$。
 
+% TODO: 加一小节立体匹配？？？极线约束以外约束条件；局部代价计算和全局能量函数的公式等。
+\subsection{双目立体视觉步骤}
+% ref: 陈拓ch2.1.4, p23.
+在介绍了双目立体视觉中的一些基本理论和模型后，在此整理一下应用双目立体视觉的步骤。使用双目立体视觉求解目标的深度信息大致可以分为四步：
+
+（1）图像获取。使用双目摄像机拍摄图像时，要求左右摄像机的拍摄严格同步，否则如果拍摄的场景中包含移动物体，则拍摄过程中该物体的实际位置发生了变化，使用左右图像计算得到的视差也就无法目标与左右相机真实的几何关系，从而无法求得正确的深度信息。如果场景中没有移动物体，实际上既可以使用双目摄像机直接进行拍摄，也可以使用单个摄像机在不同的位置进行拍摄，但必须能够获得两次拍摄时摄像机的位置关系，因此这种方式比较难以实现。
+
+（2）立体校正。如前文所述，双目立体视觉算法基于理想的相机模型，而实际中，由于制造工艺的限制，摄像机的物理参数不可能像理想模型那么完美。透镜不可避免地存在径向畸变、离心畸变等非线性畸变；摄像机的光轴无法准确地通过图像中心；左右摄像机不会有完全相同的焦距，也不可能严格平行对齐。要应用三角测量原理，就必须先对摄像机物理参数与理想模型之间的差异进行建模，利用求得的对应关系对拍摄的左右图像进行立体校正，使之符合双目立体视觉理论的基本要求。
+
+（3）立体匹配。为完成校正后的左右图像中的点逐一建立一对一的匹配关系的过程称为立体匹配。本章并未介绍立体匹配的具体理论知识，但实际上立体匹配是双目立体视觉中最重要、也是最困难的步骤，立体匹配的效果直接决定了最终重建的三维场景的准确性。
+
+（4）三维重建。根据立体匹配得到的图像中各点的视差、双目摄像机的内外参数，应用三角测量原理计算图像中各点的深度信息，从而实现由二维图像到三维空间的重投影，完成对场景的三维重建。
+
+
+%------------------------------------------------------------------------------------
+\section{摄像机标定}
+% TODO: 二三小节已对调顺序，但公式、图标的label信息没有处理。
+% ref: 王德海，时洪光，尚倩， 吴哲岑，王莹
+摄像机标定就是确定其内部参数和外部参数的过程。对于双目摄像机，标定分为两步：首先分别标定两个相机得到其内部参数，然后再求解它们之间的相对位置关系，即旋转矩阵和平移向量。
+
+\subsection{单目摄像机标定}
+摄像机标定方法主要可分为传统标定方法和自标定方法。传统标定方法\cite{李小平2008双目视觉立体测量研究}又称为强标定，一般需要在摄像机前放置一个标定参照物，摄像机拍摄标定物后获得标定物上特征点在图像上的坐标，同时在世界坐标系下测量标定物特征点的坐标，利用图像坐标系下和世界坐标系下坐标的对应关系，借助非线性优化方法计算摄像机的内外参数\cite{时洪光2010基于双目视觉的运动目标定位研究}。自标定方法\cite{李洪海2007摄像机标定技术研究}由Faugerasa等人提出，仅利用图像间成像点的对应关系就可以得到摄像机参数\cite{王德海2016基于双目立体视觉的目标识别与抓取定位}。
+
+传统标定方法标定精度较高，但计算复杂且需要标定模板；自标定方法操作简便灵活，但鲁棒性差、精度低。张正友于1999年提出了一种介于传统标定和自标定方法之间的新方法\cite{zhang1999flexible}，只需要一个平面的标定板，操作简单，鲁棒性好，精度较高，近年来被广泛应用。本文使用这种方法进行摄像机的标定。
+
+张正友标定法的基本思想是：摄像机的外部参数变化而内部参数恒定，使用一个确定规格的标定板从不同角度进行拍摄，每张图像可以用来确定一个单应性(Homography)，能提供8个方程，同时引入了6个未知量（三维空间的旋转和平移），故得到2个约束条件。使用多张图片即可求解所有内参值。具体算法原理如下。
+
+%（1）建立摄像机的几何模型
+
+设空间中任一点$\mathbf{P}$在图像坐标系和世界坐标系下的坐标分别为$\mathbf{m}=[u,v]^T$和$\mathbf{M}=[X, Y, Z]^T$，齐次坐标形式为$\tilde{\mathbf{m}} = [u,v,1]^T$和$\tilde{\mathbf{M}} = [X,Y,Z,1]^T$。对于线性模型，二者具有如下关系：
+%
+\begin{equation}\label{eq:2_2_mono_calib_0}
+s \tilde{\mathbf{m}} = \mathbf{A} [ \mathbf{R}  \quad  \mathbf{t} ] \tilde{\mathbf{M}}
+\end{equation}
+其中，$s$为尺度因子，$\mathbf{R}$和$\mathbf{t}$为摄像机的外参，$\mathbf{A}$为摄像机内参矩阵。相较上一节中建立的线性模型，Zhang\cite{zhang2000flexible}在模型中多考虑了相机两个轴之间的倾斜，因此$\mathbf{A}$表示为：
+%
+\begin{equation}\label{eq:2_2_mono_calib_1}
+\mathbf{A}=
+\left[ \begin{array}{ccc}
+\alpha_x & \gamma & u_0 \\
+0 & \alpha_y & v_0 \\
+0 & 0 & 1
+\end{array} \right]
+\end{equation}
+$\gamma$描述相机两个轴之间非严格正交所造成的影响，其余参数的定义与上一节线性模型中的定义相同。
+为了简化问题，我们假定标定板图像所在平面与世界坐标系中$X_wOY_w$平面重合，故所有点的坐标$Z=0$。使用$\mathbf{r_i}$表示矩阵$\mathbf{R}$的第$i$列，则式\ref{eq:2_2_mono_calib_0}可简化为：
+%
+\begin{equation}\label{eq:2_2_mono_calib_2}
+s
+\begin{bmatrix}
+u \\ v \\ 1
+\end{bmatrix}
+= \mathbf{A} \hspace{2pt}  [ \mathbf{r_1} \quad \mathbf{r_2} \quad \mathbf{r_3} \quad \mathbf{t} ]
+\begin{bmatrix}
+X \\ Y \\ 0 \\ 1
+\end{bmatrix}
+= \mathbf{A} \hspace{2pt}  [ \mathbf{r_1} \quad\mathbf{r_2} \quad \mathbf{t} ]
+\begin{bmatrix}
+X \\ Y \\ 1
+\end{bmatrix}
+\end{equation}
+
+从而，点$\mathbf{P}$在两个坐标系下的坐标变换可以用单应性矩阵$\mathbf{H}$来表示：
+%
+\begin{equation}\label{eq:2_2_mono_calib_3}
+s \tilde{\mathbf{m}} = \mathbf{H} \tilde{\mathbf{M}}
+\end{equation}
+其中，$\mathbf{H} = \mathbf{A} [ \mathbf{r_1} \quad \mathbf{r_2} \quad \mathbf{t} ]$是$3\times 3$的矩阵。令$\mathbf{H} = [\mathbf{h_1}, \mathbf{h_2}, \mathbf{h_3}]$，那么
+%
+\begin{equation}\label{eq:2_2_mono_calib_4}
+[\mathbf{h_1} \quad \mathbf{h_2} \quad \mathbf{h_3}]
+= \lambda \mathbf{A} [ \mathbf{r_1} \quad \mathbf{r_2} \quad \mathbf{t} ]
+\end{equation}
+$\lambda$是一个常数。由于$\mathbf{R}$是正交矩阵，其列向量$\mathbf{r_1}$与$\mathbf{r_2}$相互正交，故有
+%
+\begin{equation}\label{eq:2_2_mono_calib_5}
+\left\{
+\begin{aligned}
+\mathbf{h}_1^T\mathbf{A}^{-T}\mathbf{A}^{-1}\mathbf{h}_2 &= 0 \\
+\mathbf{h}_1^T\mathbf{A}^{-T}\mathbf{A}^{-1}\mathbf{h}_1 &= \mathbf{h}_2^T\mathbf{A}^{-T}\mathbf{A}^{-1}\mathbf{h}_2 
+\end{aligned}
+\right.
+\end{equation}
+式\ref{eq:2_2_mono_calib_5}表示的是一个单应性对摄像机内部参数施加的两个约束。单应性矩阵有8个自由度，但额外引入了6个外部参数（三维空间的旋转和平移），因此只能得到两个约束条件。要求解所有的内部参数，需要使用多个单应性的信息。
+
+令
+%
+\begin{equation}\label{eq:2_2_mono_calib_6}
+\begin{split}
+\mathbf{B} = \mathbf{A}^{-T} \mathbf{A}^{-1} \equiv
+\begin{bmatrix}
+B_{11} & B_{12} & B_{13} \\
+B_{21} & B_{22} & B_{23} \\
+B_{31} & B_{32} & B_{33} \\
+\end{bmatrix} \hspace{1.5in}
+\\
+=
+\begin{bmatrix}
+\frac{1}{\alpha_x^2} &
+-\frac{\gamma}{\alpha_x^2 \alpha_y} &
+\frac{v_0\gamma - u_0 \alpha_y}{\alpha_x^2 \alpha_y} \\
+-\frac{\gamma}{\alpha_x^2 \alpha_y} &
+\frac{\gamma^2}{\alpha_x^2 \alpha_y^2} + \frac{1}{\alpha_y^2} &
+-\frac{\gamma(v_0 \gamma - u_0 \alpha_y)}{\alpha_x^2 \alpha_y^2} - \frac{v_0}{\alpha_y^2} \\
+\frac{v_0 \gamma - u_0 \alpha_y}{\alpha_x^2 \alpha_y} &
+-\frac{\gamma (v_0 \gamma - u_0 \alpha_y)}{\alpha_x^2 \alpha_y^2} - \frac{v_0}{\alpha_y^2} &
+\frac{ (v_0 \gamma - u_0 \alpha_y)^2 }{\alpha_x^2 \alpha_y^2} + \frac{v_0^2}{\alpha_y^2} + 1
+\end{bmatrix}
+\end{split}
+\end{equation}
+注意到$\mathbf{B}$是对称阵，可以定义一个6维向量来表示：
+%
+\begin{equation}\label{eq:2_2_mono_calib_7}
+\mathbf{b} = [B_{11}, B_{12}, B_{22}, B_{13}, B_{23}, B_{33}]^T
+\end{equation}
+
+令$\mathbf{H}$的第$i$列为$\mathbf{h_i} = [h_{i1}, h_{i2}, h_{i3}]^T$，则有
+%
+\begin{equation}\label{eq:2_2_mono_calib_8}
+\mathbf{h}_I^T \mathbf{B} \mathbf{h}_j = \mathbf{v}_{ij}^T \mathbf{b}
+\end{equation}
+其中，$\mathbf{v}_{ij} = [h_{i1} h_{j1}, h_{i2} h_{j2} + h_{i2} h_{j1}, h_{i2} h_{j2}, h_{i3} h_{j1} +h_{i1} h_{j3}, h_{i3} h_{j2} + h_{i2} h_{j3}, h_{i3} h_{j3}]^T$。
+从而两个约束方程\ref{eq:2_2_mono_calib_5}可以改写为$\mathbf{b}$的齐次方程组：
+%
+\begin{equation}\label{eq:2_2_mono_calib_9}
+\begin{bmatrix}
+\mathbf{v}_{12}^T \\ (\mathbf{v}_{11} - \mathbf{v}_{22})^T
+\end{bmatrix}
+\mathbf{b} = \mathbf{0}
+\end{equation}
+
+对标定板的$n$幅图片，则联立$n$个方程组\ref{eq:2_2_mono_calib_9}为
+%
+\begin{equation}\label{eq:2_2_mono_calib_10}
+\mathbf{Vb} = \mathbf{0}
+\end{equation}
+$\mathbf{V}$是一个$2n \times 6$的矩阵。如果$n \geq 3$，我们可以得到$\mathbf{b}$的唯一解；如果$n = 2$，我们可以令$\gamma=0$，从而得到唯一解；如果$n=1$，则我们只能假设一部分内参数已知来求解另外2个内参数。方程组\ref{eq:2_2_mono_calib_10}的解是$\mathbf{V}^T\mathbf{V}$最小特征值对应的特征向量。
+
+在求得$\mathbf{b}$之后，即可通过以下公式来计算摄像机所有的内部参数：
+%
+\begin{equation}\label{eq:2_2_mono_calib_11}
+\left\{ 
+\begin{aligned}
+v_0 &= (B_{12}B_{13}-B_{11}B_{23}) / (B_{11}B_{22} - B_{12}^2) \\
+\lambda &= B_{33} - [B_{13}^2 + v_0 (B_{12}B_{13} - B_{11}B_{23})] / B_{11} \\
+\alpha_x &= \sqrt{\lambda / B_{11}} \\
+\alpha_y &= \sqrt{\lambda B_{11} / (B_{11}B_{22} - B_{12}^2)} \\
+\gamma &= -B_{12}\alpha_x^2 \alpha_y / \lambda \\
+u_0 &= \gamma v_0 / \alpha_x - B_{13} \alpha_x^2 / \lambda
+\end{aligned}
+\right.
+\end{equation}
+
+得到$\mathbf{A}$后即可利用下式计算外部参数：
+%
+\begin{equation}\label{eq:2_2_mono_calib_12}
+\mathbf{r}_1 = \lambda \mathbf{A}^{-1}\mathbf{h}_1, \quad
+\mathbf{r}_2 = \lambda \mathbf{A}^{-1}\mathbf{h}_2, \quad
+\mathbf{r}_3 = \mathbf{r}_1 \times \mathbf{r}_2, \quad
+\mathbf{t} = \lambda \mathbf{A}^{-1}\mathbf{h}_3
+\end{equation}
+$\lambda = 1/||\mathbf{A}^{-1}\mathbf{h}_1||$。一般计算得到的矩阵$\mathbf{R}$并不满足旋转矩阵的性质，可以使用奇异值分解等方法获得更好的解。
+
+由于拍摄图片中存在噪声，提取的角点会存在误差，可以通过最小化式\ref{eq:2_2_mono_calib_13}中的目标函数来得到各角点坐标的最大似然估计：
+%
+\begin{equation}\label{eq:2_2_mono_calib_13}
+\sum_{i=1}^{n} \sum_{j=1}^{m}|| \mathbf{m}_{ij} - \hat{\mathbf{m}}(\mathbf{A}, \mathbf{R}_i, \mathbf{t}_i, \mathbf{M}_j) ||^2
+\end{equation}
+式中，$\hat{\mathbf{m}}(\mathbf{A}, \mathbf{R}_i, \mathbf{t}_i, \mathbf{M}_j)$表示点$\mathbf{M}_j$在图像$i$中的投影。该非线性最小化问题可利用Levenberg-Marquardt算法迭代求解，使用前面的结果作为初值。优化时中可以加入畸变项以得到畸变参数。
+
+%------------------------------------------------------------------------------------
+\subsection{双目摄像机标定}
+% ref: 王德海，王莹，邓国栋，时洪光. 都是一样的公式。
+双目摄像机标定是在完成两个单目摄像机标定的基础上，求解它们之间的旋转矩阵$R$和平移向量$t$的过程。
+设左右相机的外部参数分别为$(\mathbf{R}_1, \mathbf{t}_1)$和$(\mathbf{R}_2, \mathbf{t}_2)$，世界坐标系下某点$\mathbf{x}_w$在两个摄像机坐标系下的分别表示为$\mathbf{x}_l$和$\mathbf{x}_r$，则
+%
+\begin{equation}\label{eq:2_2_binono_calib_0}
+\mathbf{x}_l = \mathbf{R}_l + \mathbf{t}_l, \quad \mathbf{x}_r = \mathbf{R}_r + \mathbf{t}_r
+\end{equation}
+
+联立两式，消去$\mathbf{x}_w$，得到$\mathbf{x}_l$和$\mathbf{x}_r$的关系为
+%
+\begin{equation}\label{eq:2_2_binono_calib_1}
+\mathbf{x}_r = \mathbf{R}_r \mathbf{R}_l^{-1}\mathbf{x}_l +
+( \mathbf{t}_r - \mathbf{R}_r \mathbf{R}_l^{-1}\mathbf{t}_l )
+\end{equation}
+
+从而可知两摄像机之间的旋转和平移关系分别为
+%
+\begin{equation}\label{eq:2_2_binono_calib_2}
+\mathbf{R} = \mathbf{R}_r \mathbf{R}_l^{-1},  \quad
+\mathbf{t} =  \mathbf{t}_r -  \mathbf{R}_r  \mathbf{R}_l^{-1} t_l
+\end{equation}
+
+%------------------------------------------------------------------------------------
+\subsection{实验结果}
+实验使用的摄像机为ZED双目相机，分辨率设置为720p($1280\times 720$)。标定板上的图案为棋盘格，每个方格的边长为$10cm$，共有$7 \times 6$个方格，故每行有6个角点，每列有5个角点。使用ZED相机在室外采集了31组图片，部分标定图像如图\ref{fig:2_2_calib_imgs}所示。
+
+\begin{figure}[!htb] %部分标定图片
+	\centering
+	\begin{minipage}[c]{0.48\textwidth}
+		\centering
+		\includegraphics[width=3in]{figures/2_2_calib/left_4x3}
+		\centerline{\small{左摄像机采集图片}}
+	\end{minipage}
+	\hfill
+	\begin{minipage}[c]{0.48\textwidth}
+		\centering
+		\includegraphics[width=3in]{figures/2_2_calib/right_4x3}
+		\centerline{\small{右摄像机采集图片}}
+	\end{minipage}
+	\caption{部分标定图片}\label{fig:2_2_calib_imgs}
+\end{figure}
+
+分别使用基于OpenCV 2.4.13编写的C++程序和MATLAB双目相机标定工具箱进行了标定操作。经过多次试验，发现OpenCV标定的结果中畸变参数变化很大，结果并不可靠，故在此只给出使用Matlab标定工具箱得到的结果。由于采集图像时光线较暗，标定工具箱共接受了31组图片中的15组，标定结果如表\ref{tab:2_2_calib_result}所示，平均重投影误差(mean reprojection error)为$0.1262$， 各组图片的重投影误差情况见图\ref{fig:2_2_reprojection_errors}。
+
+\begin{table}[!htb] %ZED双目相机标定结果
+	\centering
+	\caption{ZED双目相机标定结果}\label{tab:2_2_calib_result}
+	\begin{small}
+		\begin{tabular}{ccc|c} \toprule[2pt]
+			内参数                  & 左相机          & 右相机 & 外参数 \\ \midrule[1pt]
+			$\alpha_x$         & 701.9830   & 703.6765  &
+			\multirow{4}*{$ \mathbf{R} = \left[ \begin{tabular}{ccc}
+				0.9999 & -1.8511e-04 & -0.0108 \\
+				6.8373e-05 & 0.9999 & -0.0108 \\
+				0.0108 & 0.0108 & 0.9999 \end{tabular} \right] $}\\
+			$\alpha_y$         & 701.7472    & 703.3212 & \\
+			$u_0$                  & 604.6113   & 618.4235 & \\
+			$v_0$                  & 366.4776  & 346.8419 & \\
+			畸变系数$k_1$   & -0.1603     & -0.1648 &
+			\multirow{2}*{$\mathbf{t}=[-120.1123 \quad 0.1007 \quad 2.0492]^T$} \\
+			畸变系数$k_2$   & 0.0138       & 0.0174 & \\ \bottomrule[2pt]
+		\end{tabular}
+	\end{small}
+\end{table}
+
+\begin{figure}[!htb] %标定重投影误差
+	\centering
+	\includegraphics[width=5in]{figures/2_2_reprojection_errors}
+	\caption{重投影误差}\label{fig:2_2_reprojection_errors}
+\end{figure}
+
+\begin{figure}[!htb] %标定图像的三维位置
+	\centering
+	\includegraphics[width=5in]{figures/2_2_extrinsics}
+	\caption{标定图像的三维位置}\label{fig:2_2_extrinsics}
+\end{figure}
+
+\begin{figure}[!htb] %立体校正后的图像
+	\centering
+	\includegraphics[width=6in]{figures/2_2_rectified_image}
+	\caption{立体校正后的图像}\label{fig:2_2_rectified_image}
+\end{figure}
+
+
 
 %------------------------------------------------------------------------------------
 \section{本章小结}
-
+本章主要概述了双目立体视觉的基本原理。首先介绍了几个常用的坐标系及其转换关系，并建立了摄像机的线性和非线性数学模型。之后阐述了立体视觉测量原理、平行光轴视觉模型与使用视差计算深度的三角测量原理，并介绍了立体校正的Bouguet算法。最后使用MATLAB摄像机标定工具箱对ZED双目相机进行了标定，获得了其内外参数，为后文建立目标检测与定位系统奠定了基础。
 
 
 
