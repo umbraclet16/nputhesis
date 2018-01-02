@@ -155,7 +155,7 @@ DispNetC与基础架构的区别存在于前三层。只需要将基础架构的
 	\centering
 	\caption{DispNet网络结构详细参数}
 	\label{tab:4_1_DispNet_architecture}
-	\begin{scriptsize}   % tiny, scriptsize, footnotesize, small.
+	\begin{small}   % tiny, scriptsize, footnotesize, small.
 		\begin{tabular}{|l|c c c|c c|c|}\hline
 			网络层 & 卷积核 & 步长 & 输入/输出通道数 & 输入分辨率 & 输出分辨率 & 该层输入 \\\hline
 			%---------------------------------------------------------
@@ -189,14 +189,14 @@ DispNetC与基础架构的区别存在于前三层。只需要将基础架构的
 			pr1+loss1  & 3x3 & 1 & 32/1         & 384x192 & 384x192 & iconv1 \\\hline
 			%---------------------------------------------------------
 		\end{tabular}
-    \end{scriptsize}
+    \end{small}
 \end{table}
 
 \begin{table}[htbp]
 	\centering
 	\caption{DispNetC与基础架构差异部分的详细参数}
 	\label{tab:4_1_DispNetC_architecture}
-	\begin{scriptsize}
+	\begin{small}
 		\begin{tabular}{|l|c c c|c c|c|}\hline
 			网络层  & 卷积核 & 步长 & 输入/输出通道数 & 输入分辨率 & 输出分辨率 & 该层输入 \\\hline
 			%---------------------------------------------------------
@@ -208,7 +208,7 @@ DispNetC与基础架构的区别存在于前三层。只需要将基础架构的
 			corr                   & --   &  - & 128/81            & 192x96    & 192x96    & conv2a+conv2b \\
 			conv3a            & 5x5 & 2 & 64+81/256    & 192x96    & 96x48      & corr+conv\_redir \\\hline
 		\end{tabular}
-	\end{scriptsize}
+	\end{small}
 \end{table}
 
 根据论文\cite{mayer2016large}给出的结果，DispNetC的效果优于DispNet，而运行时间上两者并没有明显差异，因此本文采用DispNetC网络结构。
@@ -331,13 +331,19 @@ D = \frac{1}{M}\left( \sum_{\mathbf{p} \in \mathbf{A}} \Big[ \big| d(\mathbf{p})
 \end{figure}
 
 训练1400k后，最终的测试误差为: $e = 3.78$px, $D1 = 14.94\%$。
-需要说明的是，FlyingThings3D数据集本身存在一些缺陷，其中有些失效的图片，还有无法单纯依靠匹配算法进行匹配的图片（如图\ref{fig:4_3_abnormal})，这些数据难以从数据集中剔除，因此测试结果的误差会比应用在现实场景中时偏大。
+图\ref{fig:4_3_ft3d_multiscale}给出了训练过程中使用tensorflow的可视化工具tensorboard获取的第1174900次迭代时各个尺度下的预测结果。由图可见，从pr6到pr1的前向传播网络中，除了pr6和pr5两层分辨率太小导致强制放大后仍难以与真实视差图进行对比，从pr4开始，随着输出分辨率的提高，预测结果变得越来越细致、准确，对细节的把握越来越好。这可以证明DispNet这种由粗到细(coarse to fine)的预测结构是合理的，能够取得良好的匹配效果。
 
+\begin{figure}[htbp] %各尺度下的预测结果
+	\centering\includegraphics[width=6in]{figures/4_3_ft3d_multiscale}
+	\caption{各尺度下的预测结果} \label{fig:4_3_ft3d_multiscale}
+\end{figure}
+
+另外需要说明的是，FlyingThings3D数据集本身存在一些缺陷，其中有些失效的图片，还有一些包含非凸的图形、无法单纯依靠匹配算法进行匹配的图片（如图\ref{fig:4_3_abnormal})，这些数据难以从数据集中剔除，因此测试结果的误差会比应用在现实场景中时偏大。
 % abnormal image pairs
-\begin{figure}[!htbp]
-	\centering\includegraphics[width=2.5in]{figures/4_3_abnormal_imgs/l_003}
+\begin{figure}[htbp]
+	\centering\includegraphics[width=2.8in]{figures/4_3_abnormal_imgs/l_003}
 	\hspace{20pt}
-	\centering\includegraphics[width=2.5in]{figures/4_3_abnormal_imgs/r_003}
+	\centering\includegraphics[width=2.8in]{figures/4_3_abnormal_imgs/r_003}
 	\caption{FlyingThings3D中难以匹配的图片}\label{fig:4_3_abnormal}
 \end{figure}
 
@@ -345,8 +351,10 @@ D = \frac{1}{M}\left( \sum_{\mathbf{p} \in \mathbf{A}} \Big[ \big| d(\mathbf{p})
 
 
 % 三种算法在ft3d上的匹配结果对比图. 
-\begin{figure}[!htb]
-	% 3组占不满一页，4组放不开，蛋疼。‘!’忽略美学标准，强制和文字凑一页。
+\begin{figure}[htbp]
+	% 3组占不满一页，4组放不开，蛋疼。
+	% [htbp]放一页。如果不带p，会被放到章尾；
+	% [!htb]: ‘!’忽略美学标准，强制和文字凑一页。不需要p。
 	%>>>>>>>>>>>>>>>>>>>>第1组>>>>>>>>>>>>>>>>>>>>
 	%----------------------第1行-----------------------
 	\begin{minipage}{0.3\linewidth}
@@ -372,23 +380,26 @@ D = \frac{1}{M}\left( \sum_{\mathbf{p} \in \mathbf{A}} \Big[ \big| d(\mathbf{p})
 		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/sgm_000}}
 		\vspace{-10pt}
 		\centerline{SGM}
+		\vspace{0.5in} %%%
 	\end{minipage}
 	\hfill
 	\begin{minipage}{0.3\linewidth}
 		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/sps_000}}
 		\vspace{-10pt}
 		\centerline{SPS-St}
+		\vspace{0.5in} %%%
 	\end{minipage}
 	\hfill
 	\begin{minipage}{0.3\linewidth}
 		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/pred_000}}
 		\vspace{-10pt}
 		\centerline{DispNetC}
+		\vspace{0.5in} %%%
 	\end{minipage}
 	%<<<<<<<<<<<<<<<<<<<<第1组<<<<<<<<<<<<<<<<<<<<
 	%>>>>>>>>>>>>>>>>>>>>第2组>>>>>>>>>>>>>>>>>>>>
 	%----------------------第1行-----------------------
-		\begin{minipage}{0.3\linewidth}
+	\begin{minipage}{0.3\linewidth}
 		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/l_005}}
 		\vspace{-10pt}
 		\centerline{左图}
@@ -411,19 +422,22 @@ D = \frac{1}{M}\left( \sum_{\mathbf{p} \in \mathbf{A}} \Big[ \big| d(\mathbf{p})
 		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/sgm_005}}
 		\vspace{-10pt}
 		\centerline{SGM}
+		\vspace{0.5in} %%%
 	\end{minipage}
 	\hfill
 	\begin{minipage}{0.3\linewidth}
 		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/sps_005}}
 		\vspace{-10pt}
 		\centerline{SPS-St}
+		\vspace{0.5in} %%%
 	\end{minipage}
 	\hfill
 	\begin{minipage}{0.3\linewidth}
-	\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/pred_005}}
-	\vspace{-10pt}
-	\centerline{DispNetC}
-\end{minipage}
+		\centerline{\includegraphics[width=2in]{figures/cmp_ft3d/pred_005}}
+		\vspace{-10pt}
+		\centerline{DispNetC}
+		\vspace{0.5in} %%%
+	\end{minipage}
 	%<<<<<<<<<<<<<<<<<<<<第2组<<<<<<<<<<<<<<<<<<<<
 	%>>>>>>>>>>>>>>>>>>>>第3组>>>>>>>>>>>>>>>>>>>>
 	%----------------------第1行-----------------------
@@ -627,22 +641,37 @@ Flyingthings3D是人工合成的数据集，与真实场景具有一定的差异
 	\caption{不同匹配算法在KITTI2015数据集上的对比}
 	\label{tab:4_3_cmp_kitti}
 %	\begin{small} %{scriptsize}
+		% 两列： 平均错误率，运行时间。
 		\begin{tabular}{|c|c|c|c|}\hline
-			方法          & 平均视差误差(px) & 平均错误率(\%) & 运行时间(s) \\\hline
+			方法             & 平均错误率(\%) & 运行时间(s) \\\hline
 			%---------------------------------------------------------
-			AD            & 11.56                      & 32.02                 & --      \\
-			CCNN      & 8.50                       & 17.70                  & --      \\
-			OCV-BM &  --                           & 25.27                  &  0.1    \\
-			SGM         & --                            & 10.86                 &  1.1     \\
-			SPS-St    & --                            & 5.31                    & 2         \\
-			DispNetC & 1.37                       & 7.74                   & \textbf{0.06}  \\\hline
+			AD               & 32.02                 & --      \\
+			CCNN          & 17.70                  & --      \\
+			OCV-BM      & 25.27                  &  0.1    \\
+			SGM            & 10.86                 &  1.1     \\
+			SPS-St         & 5.31                    & 2         \\
+			DispNetC     & 7.74                   & \textbf{0.06}  \\\hline
 		\end{tabular}
+	
+	%三列：平均视差误差，平均错误率，运行时间。但平均视差误差对于kitti leaderboard上的算法没有数据！
+%		\begin{tabular}{|c|c|c|c|}\hline
+%			方法          & 平均视差误差(px) & 平均错误率(\%) & 运行时间(s) \\\hline
+%			%---------------------------------------------------------
+%			AD            & 11.56                      & 32.02                 & --      \\
+%			CCNN      & 8.50                       & 17.70                  & --      \\
+%			OCV-BM &  --                           & 25.27                  &  0.1    \\
+%			SGM         & --                            & 10.86                 &  1.1     \\
+%			SPS-St    & --                            & 5.31                    & 2         \\
+%			DispNetC & 1.37                       & 7.74                   & \textbf{0.06}  \\\hline
+%		\end{tabular}
 %	\end{small} %{scriptsize}
 \end{table}
 
 
 \subsubsection{训练集大小对实验结果的影响}
 为了研究训练集大小对实验结果的影响，在微调时分别使用KITTI2015训练数据的20\%、40\%、60\%、80\%(即40、80、120和160组图片)对网络进行训练，在剩余40组图片上进行验证，实验结果见图\ref{fig:4_3_kitti_dataset_size}和表\ref{tab:4_3_kitti_dataset_size}。
+
+由表中结果可以得知，训练数据集越大，训练出的网络模型就越好，最终网络的匹配精度就越高。因此，使用更多的真实训练数据是提高匹配准确度的最直接的方法。
 
 %训练集大小对实验结果的影响
 \begin{table}[!htb]
@@ -669,8 +698,6 @@ Flyingthings3D是人工合成的数据集，与真实场景具有一定的差异
 	\caption{不同训练集大小下的测试误差变化趋势}\label{fig:4_3_kitti_dataset_size}
 \end{figure}
 
-
-由表中结果可以得知，训练数据集越大，训练出的网络模型就越好，最终网络的匹配精度就越高。因此，使用更多的真实训练数据是提高匹配准确度的最直接的方法。
 
 %TODO: 网络结构的参数选择/数据增强/光照变化对结果的影响。
 
