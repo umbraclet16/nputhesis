@@ -364,10 +364,10 @@ YOLO的网络架构借鉴了用于图像分类的GoogLeNet\cite{szegedy2015going
 Loss = & \lambda_{coord} \sum_{i=0}^{S^2}\sum_{j=0}^B \mathbf{1}_{ij}^{obj}
 			\left[(x_i - \hat{x}_i)^2 + (y_i - \hat{y}_i)^2\right] \\
 & + \lambda_{coord}  \sum_{i=0}^{S^2}\sum_{j=0}^B \mathbf{1}_{ij}^{obj}
-			\left[ \left(\sqrt{w_i} - \sqrt{\hat{w_i}} \right) ^2 + \left( \sqrt{h_i} - \sqrt{\hat{h_i}} \right) ^2\right] \\
-& + \sum_{i=0}^{S^2}\sum_{j=0}^B \mathbf{1}_{ij}^{obj} (C_i - \hat{C_i})^2
-			+ \lambda_{noobj} \sum_{i=0}^{S^2}\sum_{j=0}^B \mathbf{1}_{ij}^{noobj} (C_i - \hat{C_i})^2 \\
-& + \sum_{i=0}^{S^2} \mathbf{1}_{i}^{obj} \sum_{c \in classes} ( p_i(c) - \hat{p_i}(c) )^2 \\
+			\left[ \left(\sqrt{w_i} - \sqrt{\hat{w}_i} \right) ^2 + \left( \sqrt{h_i} - \sqrt{\hat{h}_i} \right) ^2\right] \\
+& + \sum_{i=0}^{S^2}\sum_{j=0}^B \mathbf{1}_{ij}^{obj} (C_i - \hat{C}_i)^2
+			+ \lambda_{noobj} \sum_{i=0}^{S^2}\sum_{j=0}^B \mathbf{1}_{ij}^{noobj} (C_i - \hat{C}_i)^2 \\
+& + \sum_{i=0}^{S^2} \mathbf{1}_{i}^{obj} \sum_{c \in classes} ( p_i(c) - \hat{p}_i(c) )^2 \\
 \end{split}
 \end{equation}
 式中，当第i个方格中包含待检测的物体时，$\mathbf{1}_{i}^{obj}$取值为1，否则为0；并且只有第i个方格预测的第j个检测框负责该物体的检测时，$\mathbf{1}_{ij}^{obj}$取为1，其余情况都为0。这两个系数的存在确保了只有包含待检测物体的方格会产生对应于物体分类误差的代价项（第四行的代价项，$p(c)$表示该物体属于c类别的概率），以及只有负责检测某个物体的检测框才会产生对应于边界框位置和尺寸误差的代价项（前两行的代价项）。另外需要强调，x、y、w、h分别是相对小方格边长和图像边长归一化后的结果，且x、y的原点是图像中物体所归属方格的左上角。
@@ -380,7 +380,7 @@ Loss = & \lambda_{coord} \sum_{i=0}^{S^2}\sum_{j=0}^B \mathbf{1}_{ij}^{obj}
 对于代价函数中的第二项，也就是检测框宽度和高度误差对应的代价项，原算法使用平方根的方式只能在一定程度上改善“相同误差对不同尺寸检测框影响程度不同”这个问题。实际上我们可以利用归一化的思想来对其进行改进：
 \begin{equation}
 \lambda_{coord}  \sum_{i=0}^{S^2}\sum_{j=0}^B \mathbf{1}_{ij}^{obj}
-\left[ \left(\frac{w_i - \hat{w_i}}{w_i} \right) ^2 + \left( \frac{h_i - \hat{h_i}}{h_i} \right) ^2\right]
+\left[ \left(\frac{w_i - \hat{w}_i}{\hat{w}_i} \right) ^2 + \left( \frac{h_i - \hat{h}_i}{\hat{h}_i} \right) ^2\right]
 \end{equation}
 通过归一化操作，绝对误差与检测框的尺寸被联系了起来，相当于改为使用检测框尺寸的相对误差来计算代价项，从而解决了存在的问题。
 
