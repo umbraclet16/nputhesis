@@ -1,14 +1,424 @@
 % Encoding: UTF-8
 %------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ch1. 立体视觉的研究概况
+% ch1.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1.1 研究背景及意义
+@phdthesis{刘天奇2015,
+	title={无人机视觉稳定避障系统的设计与实现},
+	author={刘天奇},
+	school={北京工业大学},
+	year={2015},
+}
+
+@phdthesis{朱玮2014,
+	title={基于视觉的四旋翼飞行器目标识别及跟踪},
+	author={朱玮},
+	school={南京航空航天大学},
+	year={2014},
+}
+
+@phdthesis{陈丽娟2013,
+	title={基于视觉的无人直升机着落导航技术研究},
+	author={陈丽娟},
+	school={南京航空航天大学},
+	year={2013},
+}
+
+@phdthesis{周士超2016,
+	title={无人机电力巡检视觉避障技术研究},
+	author={周士超},
+	school={北京理工大学},
+	year={2016},
+}
+
+@phdthesis{袁峻2017,
+	title={无人机图像目标跟踪与定位},
+	author={袁峻},
+	school={南京理工大学},
+	year={2017},
+}
+
+@article{赵霞2016,
+	title={基于视觉的目标定位技术的研究进展},
+	author={赵霞 and 袁家政 and 刘宏哲},
+	journal={计算机科学},
+	volume={43},
+	number={6},
+	pages={10-16},
+	year={2016},
+}
+
+@phdthesis{苏东2014,
+	title={基于双目视觉的小型无人飞行器的导航与避障},
+	author={苏东},
+	school={电子科技大学},
+	year={2014},
+}
+
+%------------------------------------------------------------------------
+% 1.2 目标检测的研究概况
+
+@article{尹宏鹏2016,
+	title={基于视觉的目标检测与跟踪综述},
+	author={尹宏鹏 and 陈波 and 柴毅 and 刘兆栋},
+	journal={自动化学报},
+	volume={42},
+	number={10},
+	pages={1466-1489},
+	year={2016},
+}
+
+% 1.2.1 传统目标检测方法
+
+@article{郭明玮2014,
+	title={基于支持向量机的目标检测算法综述},
+	author={郭明玮 and 赵宇宙 and 项俊平 and 张陈斌 and 陈宗海},
+	journal={控制与决策},
+	number={2},
+	pages={193-200},
+	year={2014},
+}
+
+% SIFT
+@article{Lowe2004Distinctive,
+	title={Distinctive Image Features from Scale-Invariant Keypoints},
+	author={Lowe, David G},
+	journal={IJCV},
+	volume={60},
+	number={2},
+	pages={91-110},
+	year={2004},
+}
+
+% PCA-SIFT
+@inproceedings{Ke2004PCA,
+	title={PCA-SIFT: a more distinctive representation for local image descriptors},
+	author={Ke, Yan and Sukthankar, R.},
+	booktitle={IEEE Computer Society Conference on Computer Vision \& Pattern Recognition},
+	pages={506-513},
+	year={2004},
+}
+
+% SURF
+@inproceedings{Bay2006SURF,
+	title={SURF: Speeded Up Robust Features},
+	author={Bay, Herbert and Tuytelaars, Tinne and Gool, Luc Van},
+	booktitle={European Conference on Computer Vision},
+	pages={404-417},
+	year={2006},
+}
+
+% DAISY
+@article{Tola2010DAISY,
+	title={DAISY: an efficient dense descriptor applied to wide-baseline stereo},
+	author={Tola, E and Lepetit, V and Fua, P},
+	journal={IEEE Transactions on Pattern Analysis \& Machine Intelligence},
+	volume={32},
+	number={5},
+	pages={815-30},
+	year={2010},
+}
+
+% HOG
+@inproceedings{Dalal2005Histograms,
+	title={Histograms of Oriented Gradients for Human Detection},
+	author={Dalal, Navneet and Triggs, Bill},
+	booktitle={IEEE Computer Society Conference on Computer Vision \& Pattern Recognition},
+	pages={886-893},
+	year={2005},
+}
+
+% v-HOG
+@inproceedings{Zhu2006Fast,
+	title={Fast Human Detection Using a Cascade of Histograms of Oriented Gradients},
+	author={Zhu, Qiang and Yeh, Mei Chen and Cheng, Kwang Ting and Avidan, Shai},
+	booktitle={Computer Vision and Pattern Recognition, 2006 IEEE Computer Society Conference on},
+	pages={1491-1498},
+	year={2006},
+}
+
+% GIST
+@article{Torralba2006Contextual,
+	title={Contextual guidance of eye movements and attention in real-world scenes: the role of global features in object search.},
+	author={Torralba, A and Oliva, A and Castelhano, M. S. and Henderson, J. M.},
+	journal={Psychological Review},
+	volume={113},
+	number={4},
+	pages={766},
+	year={2006},
+}
+
+% CoHOG
+@inproceedings{Watanabe2009Co,
+	title={Co-occurrence Histograms of Oriented Gradients for Pedestrian Detection},
+	author={Watanabe, Tomoki and Ito, Satoshi and Yokoi, Kentaro},
+	booktitle={Pacific Rim Symposium on Advances in Image and Video Technology},
+	pages={37-47},
+	year={2009},
+}
+
+% Gabor
+@article{Jain1997Object,
+	title={Object detection using gabor filters},
+	author={Jain, Anil K. and Ratha, Nalini K. and Lakshmanan, Sridhar},
+	journal={Pattern Recognition},
+	volume={30},
+	number={2},
+	pages={295-309},
+	year={1997},
+}
+
+% LBP
+@inproceedings{Zhou20103D,
+	title={3D Face Recognition with Local Binary Patterns},
+	author={Zhou, Xuebing and Sánchez, Silvia Araujo and Kuijper, Arjan},
+	booktitle={Sixth International Conference on Intelligent Information Hiding and Multimedia Signal Processing},
+	pages={329-332},
+	year={2010},
+}
+
+% Harr-like
+@article{Viola2001Robust,
+	title={Robust Real-Time Object Detection},
+	author={Viola, Paul and Jones, Michael J.},
+	journal={International Journal of Computer Vision},
+	volume={57},
+	number={2},
+	pages={87},
+	year={2001},
+}
+
+% Regionlets
+@inproceedings{Wang2014Regionlets,
+	title={Regionlets for Generic Object Detection},
+	author={Wang, Xiaoyu and Yang, Ming and Zhu, Shenghuo and Lin, Yuanqing},
+	booktitle={IEEE International Conference on Computer Vision},
+	pages={17-24},
+	year={2014},
+}
+
+% DPM
+@article{felzenszwalb2010object,
+	title={Object detection with discriminatively trained part-based models},
+	author={Felzenszwalb, Pedro F and Girshick, Ross B and McAllester, David and Ramanan, Deva},
+	journal={IEEE transactions on pattern analysis and machine intelligence},
+	volume={32},
+	number={9},
+	pages={1627--1645},
+	year={2010},
+	publisher={IEEE}
+}
+
+% Shape context
+@article{belongie2002shape,
+	title={Shape matching and object recognition using shape contexts},
+	author={Belongie, Serge and Malik, Jitendra and Puzicha, Jan},
+	journal={IEEE transactions on pattern analysis and machine intelligence},
+	volume={24},
+	number={4},
+	pages={509--522},
+	year={2002},
+	publisher={IEEE}
+}
+
+% kAS
+@article{ferrari2008groups,
+	title={Groups of adjacent contour segments for object detection},
+	author={Ferrari, Vittorio and Fevrier, Loic and Jurie, Frederic and Schmid, Cordelia},
+	journal={IEEE transactions on pattern analysis and machine intelligence},
+	volume={30},
+	number={1},
+	pages={36--51},
+	year={2008},
+	publisher={IEEE}
+}
+
+% 颜色SIFT
+@inproceedings{rassem2011object,
+	title={Object class recognition using combination of color SIFT descriptors},
+	author={Rassem, Taha H and Khoo, Bee Ee},
+	booktitle={Imaging Systems and Techniques (IST), 2011 IEEE International Conference on},
+	pages={290--295},
+	year={2011},
+	organization={IEEE}
+}
+
+% Color names
+@article{van2009learning,
+	title={Learning color names for real-world applications},
+	author={Van De Weijer, Joost and Schmid, Cordelia and Verbeek, Jakob and Larlus, Diane},
+	journal={IEEE Transactions on Image Processing},
+	volume={18},
+	number={7},
+	pages={1512--1523},
+	year={2009},
+	publisher={IEEE}
+}
+
+% SVM
+@article{kotsiantis2006machine,
+	title={Machine learning: a review of classification and combining techniques},
+	author={Kotsiantis, Sotiris B and Zaharakis, Ioannis D and Pintelas, Panayiotis E},
+	journal={Artificial Intelligence Review},
+	volume={26},
+	number={3},
+	pages={159--190},
+	year={2006},
+	publisher={Kluwer Academic Publishers}
+}
+
+@book{scholkopf2001learning,
+	title={Learning with kernels: support vector machines, regularization, optimization, and beyond},
+	author={Scholkopf, Bernhard and Smola, Alexander J},
+	year={2001},
+	publisher={MIT press}
+}
+
+% 1.2.2 基于深度学习的目标检测方法
+% Object proposal surveys
+@article{hosang2014good,
+	title={How good are detection proposals, really?},
+	author={Hosang, Jan and Benenson, Rodrigo and Schiele, Bernt},
+	journal={arXiv preprint arXiv:1406.6962},
+	year={2014}
+}
+
+@article{hosang2016makes,
+	title={What makes for effective detection proposals?},
+	author={Hosang, Jan and Benenson, Rodrigo and Doll{\'a}r, Piotr and Schiele, Bernt},
+	journal={IEEE transactions on pattern analysis and machine intelligence},
+	volume={38},
+	number={4},
+	pages={814--830},
+	year={2016},
+	publisher={IEEE}
+}
+
+@inproceedings{chavali2016object,
+	title={Object-proposal evaluation protocol is' gameable'},
+	author={Chavali, Neelima and Agrawal, Harsh and Mahendru, Aroma and Batra, Dhruv},
+	booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+	pages={835--844},
+	year={2016}
+}
+
+% selective search
+@article{uijlings2013selective,
+	title={Selective search for object recognition},
+	author={Uijlings, Jasper RR and Van De Sande, Koen EA and Gevers, Theo and Smeulders, Arnold WM},
+	journal={International journal of computer vision},
+	volume={104},
+	number={2},
+	pages={154--171},
+	year={2013},
+	publisher={Springer}
+}
+
+% CPMC
+@article{carreira2012cpmc,
+	title={Cpmc: Automatic object segmentation using constrained parametric min-cuts},
+	author={Carreira, Joao and Sminchisescu, Cristian},
+	journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+	volume={34},
+	number={7},
+	pages={1312--1328},
+	year={2012},
+	publisher={IEEE}
+}
+
+% MCG
+@inproceedings{arbelaez2014multiscale,
+	title={Multiscale combinatorial grouping},
+	author={Arbel{\'a}ez, Pablo and Pont-Tuset, Jordi and Barron, Jonathan T and Marques, Ferran and Malik, Jitendra},
+	booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+	pages={328--335},
+	year={2014}
+}
+
+% objectness
+@article{alexe2012measuring,
+	title={Measuring the objectness of image windows},
+	author={Alexe, Bogdan and Deselaers, Thomas and Ferrari, Vittorio},
+	journal={IEEE transactions on pattern analysis and machine intelligence},
+	volume={34},
+	number={11},
+	pages={2189--2202},
+	year={2012},
+	publisher={IEEE}
+}
+
+% Edge boxes
+@inproceedings{zitnick2014edge,
+	title={Edge boxes: Locating object proposals from edges},
+	author={Zitnick, C Lawrence and Doll{\'a}r, Piotr},
+	booktitle={European Conference on Computer Vision},
+	pages={391--405},
+	year={2014},
+	organization={Springer}
+}
+
+% R-CNN
+@inproceedings{girshick2014rich,
+	title={Rich feature hierarchies for accurate object detection and semantic segmentation},
+	author={Girshick, Ross and Donahue, Jeff and Darrell, Trevor and Malik, Jitendra},
+	booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+	pages={580--587},
+	year={2014}
+}
+
+% SPPNet
+@inproceedings{he2014spatial,
+	title={Spatial pyramid pooling in deep convolutional networks for visual recognition},
+	author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},
+	booktitle={European Conference on Computer Vision},
+	pages={346--361},
+	year={2014},
+	organization={Springer}
+}
+
+% Fast R-CNN
+@inproceedings{girshick2015fast,
+	title={Fast r-cnn},
+	author={Girshick, Ross},
+	booktitle={Proceedings of the IEEE international conference on computer vision},
+	pages={1440--1448},
+	year={2015}
+}
+
+% Faster R-CNN
+@inproceedings{ren2015faster,
+	title={Faster R-CNN: Towards real-time object detection with region proposal networks},
+	author={Ren, Shaoqing and He, Kaiming and Girshick, Ross and Sun, Jian},
+	booktitle={Advances in neural information processing systems},
+	pages={91--99},
+	year={2015}
+}
+
+% OverFeat
+@article{sermanet2013overfeat,
+	title={Overfeat: Integrated recognition, localization and detection using convolutional networks},
+	author={Sermanet, Pierre and Eigen, David and Zhang, Xiang and Mathieu, Micha{\"e}l and Fergus, Rob and LeCun, Yann},
+	journal={arXiv preprint arXiv:1312.6229},
+	year={2013}
+}
+
+% SSD
+@inproceedings{liu2016ssd,
+	title={Ssd: Single shot multibox detector},
+	author={Liu, Wei and Anguelov, Dragomir and Erhan, Dumitru and Szegedy, Christian and Reed, Scott and Fu, Cheng-Yang and Berg, Alexander C},
+	booktitle={European conference on computer vision},
+	pages={21--37},
+	year={2016},
+	organization={Springer}
+}
+
 
 %------------------------------------------------------------------------
 % 1.3 立体匹配的研究概况
 % 1.3.1 传统立体匹配方法
 
-@article{Barnard:1982:CS:356893.356896,
+@article{Barnard1982,
 	author = {Barnard, Stephen T. and Fischler, Martin A.},
 	title = {Computational Stereo},
 	journal = {ACM Comput. Surv.},
@@ -79,18 +489,14 @@
 	url="https://doi.org/10.1023/A:1008160311296"
 }
 
-@INPROCEEDINGS{SGM_3,
-	author={A. Klaus and M. Sormann and K. Karner},
-	booktitle={18th International Conference on Pattern Recognition (ICPR'06)},
-	title={Segment-Based Stereo Matching Using Belief Propagation and a Self-Adapting Dissimilarity Measure},
-	year={2006},
-	volume={3},
-	number={},
-	pages={15-18},
-	keywords={belief maintenance;geometry;image colour analysis;image matching;image segmentation;stereo image processing;Middlebury stereo test bed;belief propagation;color segmentation;optimal disparity plane labeling;planar surface patches;segment-based stereo matching;self-adapting dissimilarity measure;self-adapting matching score;Belief propagation;Brightness;Image segmentation;Image sensors;Labeling;Layout;Pixel;Robustness;Signal to noise ratio;Testing},
-	doi={10.1109/ICPR.2006.1033},
-	ISSN={1051-4651},
-	month={},}
+%Klaus2006Segment
+@inproceedings{SGM_3,
+title={Segment-Based Stereo Matching Using Belief Propagation and a Self-Adapting Dissimilarity Measure},
+author={Klaus, A and Sormann, M and Karner, K},
+booktitle={International Conference on Pattern Recognition},
+pages={15-18},
+year={2006},
+}
 
 @Article{Viola1997,
 	author="Viola, Paul
@@ -108,13 +514,13 @@
 	url="https://doi.org/10.1023/A:1007958904918"
 }
 
+% Kim2003Visual
 @inproceedings{SGM_6,
-	title={Visual correspondence using energy minimization and mutual information},
-	author={Kim, Junhwan and others},
-	booktitle={Computer Vision, 2003. Proceedings. Ninth IEEE International Conference on},
-	pages={1033--1040},
-	year={2003},
-	organization={IEEE}
+title={Visual Correspondence Using Energy Minimization and Mutual Information},
+author={Kim, Junhwan and Kolmogorov, Vladimir and Zabih, Ramin},
+booktitle={IEEE International Conference on Computer Vision, 2003. Proceedings},
+pages={1033-1040 vol.2},
+year={2003},
 }
 
 @Article{Hirschmüller2002,
@@ -146,35 +552,21 @@
 	ISSN={0162-8828},
 	month={April},}
 
-@inproceedings{Zitnick:2004,
-	author = {Zitnick, C. Lawrence and Kang, Sing Bing and Uyttendaele, Matthew and Winder, Simon and Szeliski, Richard},
-	title = {High-quality Video View Interpolation Using a Layered Representation},
-	booktitle = {ACM SIGGRAPH 2004 Papers},
-	series = {SIGGRAPH '04},
-	year = {2004},
-	location = {Los Angeles, California},
-	pages = {600--608},
-	numpages = {9},
-	url = {http://doi.acm.org/10.1145/1186562.1015766},
-	doi = {10.1145/1186562.1015766},
-	acmid = {1015766},
-	publisher = {ACM},
-	address = {New York, NY, USA},
-	keywords = {Computer Vision, Dynamic Scenes, Image-Based Rendering},
-} 
+@inproceedings{Zitnick2004,
+title={High-quality video view interpolation using a layered representation},
+author={Zitnick, C. Lawrence and Kang, Sing Bing and Uyttendaele, Matthew and Winder, Simon and Szeliski, Richard},
+booktitle={ACM SIGGRAPH},
+pages={600-608},
+year={2004},
+}
 
-@INPROCEEDINGS{SGM_13,
-	author={V. Kolmogorov and R. Zabih},
-	booktitle={Proceedings Eighth IEEE International Conference on Computer Vision. ICCV 2001},
-	title={Computing visual correspondence with occlusions using graph cuts},
-	year={2001},
-	volume={2},
-	number={},
-	pages={508-515 vol.2},
-	keywords={computational geometry;computer graphics;computer vision;disparities;graph cuts;occlusions;visual correspondence;Computer science;Minimization methods;Motion detection;Pixel},
-	doi={10.1109/ICCV.2001.937668},
-	ISSN={},
-	month={},}
+@inproceedings{SGM_13,
+title={Computing visual correspondence with occlusions using graph cuts},
+author={Kolmogorov, V and Zabih, R},
+booktitle={Computer Vision, 2001. ICCV 2001. Proceedings. Eighth IEEE International Conference on},
+pages={508-515 vol.2},
+year={2001},
+}
 
 @Article{VanMeerbergen2002,
 	author="Van Meerbergen, G.
@@ -246,17 +638,14 @@
 	booktitle={Asian conference on computer vision},
 	pages={25--38},
 	year={2010},
-	organization={Springer}
 }
 
 @inproceedings{hirschmuller2005accurate,
-	title={Accurate and efficient stereo processing by semi-global matching and mutual information},
-	author={Hirschmuller, Heiko},
-	booktitle={Computer Vision and Pattern Recognition, 2005. CVPR 2005. IEEE Computer Society Conference on},
-	volume={2},
-	pages={807--814},
-	year={2005},
-	organization={IEEE}
+title={Accurate and Efficient Stereo Processing by Semi-Global Matching and Mutual Information},
+author={Hirschmuller, Heiko},
+booktitle={Computer Vision and Pattern Recognition, 2005. CVPR 2005. IEEE Computer Society Conference on},
+pages={807-814},
+year={2005},
 }
 
 @inproceedings{krizhevsky2012imagenet,
