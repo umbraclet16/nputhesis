@@ -35,11 +35,18 @@
 \else
   %\ctexset{chapter={name={第,章}, number={\arabic{chapter}}, %
   \ctexset{chapter={name={第,章}, number={\chinese{chapter}}, %
-      beforeskip={20pt}, afterskip={20pt}}}
+      %beforeskip={20pt}, afterskip={20pt}}}
+      %一级标题和摘要 黑体 3号 20pt行距 段前段后0行 在一级标题前、后各留一空行
+      %（宋体，小4号 12pt，单倍行距 12*1.2=14.4）
+      beforeskip={14.4pt}, afterskip={14.4pt}}}
   \ctexset{chapter={nameformat={\heiti\zihao{3}\bf}}}
   \ctexset{chapter={titleformat={\heiti\zihao{3}}}}
-  \ctexset{section={format={\heiti\zihao{4}}}}
-  \ctexset{subsection={format={\heiti\zihao{-4}}}}
+  %二级标题 黑体 4号 段前0.5行 段后0行 行间距20pt
+  %\ctexset{section={format={\heiti\zihao{4}}}
+  \ctexset{section={format={\heiti\zihao{4}}, beforeskip={10pt}, afterskip={0pt}}}
+  % 三级标题 黑体 小4号 段前0.5行 行间距20pt
+  %\ctexset{subsection={format={\heiti\zihao{-4}}}
+  \ctexset{subsection={format={\heiti\zihao{-4}}, beforeskip={10pt}, afterskip={0pt}}}
 \fi
 % content setting
 \def\@contentfont{\songti\zihao{-4}}
@@ -112,10 +119,16 @@
       \newlength{\name@length}
       \settowidth{\name@length}{\npu@schoolno}
       \begin{minipage}{\max@length}
-        \makebox[\name@length][s]{\npu@schoolno}\npu@comma \@schoolno\\
-        \makebox[\name@length][s]{\npu@classno}\npu@comma \@classno\\
-        \makebox[\name@length][s]{\npu@secretlevel}\npu@comma \@secretlevel\\
-        \makebox[\name@length][s]{\npu@authorno}\npu@comma \@authorno\\
+          \begin{tabular}{|c|c|}\hline
+              \makebox[\name@length][s]{\npu@schoolno}    & \@schoolno\\ \hline
+              \makebox[\name@length][s]{\npu@classno}     & \@classno\\ \hline
+              \makebox[\name@length][s]{\npu@secretlevel} & \@secretlevel\\ \hline
+              \makebox[\name@length][s]{\npu@authorno}    & \@authorno\\ \hline
+          \end{tabular}
+        %\makebox[\name@length][s]{\npu@schoolno}\npu@comma \@schoolno\\
+        %\makebox[\name@length][s]{\npu@classno}\npu@comma \@classno\\
+        %\makebox[\name@length][s]{\npu@secretlevel}\npu@comma \@secretlevel\\
+        %\makebox[\name@length][s]{\npu@authorno}\npu@comma \@authorno\\
       \end{minipage}
       \par\vspace{7cm}
       \zihao{1}
