@@ -386,7 +386,7 @@ Z_c = \frac{B\cdot f}{d}
 %------------------------------------------------------------------------------------
 \subsection{立体校正}
 % ref: 白鹏，学习opencv.
-对于平行光轴视觉模型，极线与图像坐标系的水平轴平行，而左右图像是行对齐的，从而沿极线的搜索即沿目标图像中对应行的搜索。但是平行光轴视觉模型只是一个理想模型，现实中的摄像机几乎不可能实现严格的平行对准。立体校正（stereo rectification）的目的是通过对两台摄像机的成像平面进行重投影，使它们落在同一个平面内，并且满足行对齐，如图\ref{fig:2_3_stereo_rectification}。Hartley\cite{hartley1999theory}、Tsai\cite{tsai1987versatile}等人提出了不同的立体校正算法，Bouguet对Tsai的算法进行了简化并开发了MATLAB摄像机标定工具箱，下面简要介绍Bouguet算法。
+对于平行光轴视觉模型，极线与图像坐标系的水平轴平行，而左右图像是行对齐的，从而沿极线的搜索即沿目标图像中对应行的搜索。但是平行光轴视觉模型只是一个理想模型，现实中的摄像机几乎不可能实现严格的平行对准。立体校正（stereo rectification）的目的是通过对两台摄像机的成像平面进行重投影，使它们落在同一个平面内，并且满足行对齐，如图\ref{fig:2_3_stereo_rectification}。Hartley\cite{hartley1999theory}、Tsai\cite{tsai1987versatile}等人提出了不同的立体校正算法，Bouguet对Tsai的算法进行了简化，下面简要介绍Bouguet算法。
 
 \begin{figure}[!htb] %立体校正示意图
 	\centering
@@ -454,8 +454,6 @@ X \\ Y \\ Z \\ W
 三维坐标为$(X/W, Y/X, Z/W)$。
 
 %------------------------------------------------------------------------------------
-% TODO: 加一小节立体匹配？？？极线约束以外约束条件；局部代价计算和全局能量函数的公式等。
-% 全他妈乱了。。
 \subsection{约束条件}
 % ref: 樊俊杰ch3.1.1 p41; 陈拓ch2.1.2 P21; 苏东ch2.2.3 p26.
 立体匹配通常涉及一定区域内的逐像素搜索，而由于图像中临近的像素点经常具有相近的像素值，备选匹配点越多，匹配的难度就越大；搜索区域越大，计算量也越大。因此，要提高匹配的效率和准确性，就要想办法减小搜索范围，减少备选匹配点的数量。为了实现此目的，研究人员基于一些合理的假设提出了很多有价值的约束条件\cite{陈拓2017CCNN}：
@@ -700,9 +698,10 @@ $\lambda = 1/||\mathbf{A}^{-1}\mathbf{h}_1||$。一般计算得到的矩阵$\mat
 	\caption{部分标定图片}\label{fig:2_2_calib_imgs}
 \end{figure}
 
-分别使用基于OpenCV 2.4.13编写的C++程序和MATLAB双目相机标定工具箱进行了标定操作。经过多次试验，发现OpenCV标定的结果中畸变参数变化很大，结果并不可靠，故在此只给出使用Matlab标定工具箱得到的结果。由于采集图像时光线较暗，标定工具箱共接受了31组图片中的15组，标定结果如表\ref{tab:2_2_calib_result}所示，平均重投影误差(mean reprojection error)为$0.1262$， 各组图片的重投影误差情况见图\ref{fig:2_2_reprojection_errors}。
+分别使用基于OpenCV 2.4.13编写的C++程序和MATLAB程序进行了标定操作。经过多次试验，发现OpenCV的标定结果中畸变参数变化很大，结果并不可靠，故以使用MATLAB得到的标定结果为准；另外注意到使用MATLAB函数rectifyStereoImages()进行立体校正后图像的分辨率会发生变化（1503x731），并且考虑到实际应用时不可能使用MATLAB对实时采集的图像进行校正，因此将标定结果按所需格式存为xml文件，再使用OpenCV程序读入该文件后进行立体校正。由于采集图像时光线较暗，共成功匹配了15组图像，使用MATLAB得到的标定结果如表\ref{tab:2_2_calib_result}所示，平均重投影误差(mean reprojection error)为$0.1262$， 各组图片的重投影误差情况见图\ref{fig:2_2_reprojection_errors}。
+使用OpenCV的stereoRectify()函数进行立体校正得到的由三维空间到左右图像的投影矩阵$P_l$、$P_r$和由左图像及视差到三维空间的重投影矩阵$Q$见式\ref{eq:2_3_PlPr}和\ref{eq:2_3_Q}。
 
-\begin{table}[!htb] %ZED双目相机标定结果
+\begin{table}[htb] %ZED双目相机标定结果
 	\centering
 	\caption{ZED双目相机标定结果}\label{tab:2_2_calib_result}
 	\begin{small}
@@ -724,19 +723,46 @@ $\lambda = 1/||\mathbf{A}^{-1}\mathbf{h}_1||$。一般计算得到的矩阵$\mat
 	\end{small}
 \end{table}
 
-\begin{figure}[!htb] %标定重投影误差
+\begin{equation}\label{eq:2_3_PlPr}
+\begin{small}
+\mathbf{P_l} = \begin{bmatrix}
+682.57 & 0 & 599.49 & 0 \\
+0 & 682.57 & 355.73 & 0 \\
+0 & 0 & 1 & 0
+\end{bmatrix},\quad
+\mathbf{P_r} = \begin{bmatrix}
+682.57 & 0 & 599.49 & 0 \\
+0 & -819.97 & 682.57 & 355.73 \\
+0 & 0 & 1 & 0
+\end{bmatrix}
+\end{small}
+\end{equation}
+
+\begin{equation}\label{eq:2_3_Q}
+\begin{small}
+\mathbf{Q} = \begin{bmatrix}
+1 & 0 & 0 & -599.49 \\
+0 & 1 & 0 & -355.73 \\
+0 & 0 & 0 & 682.57 \\
+0 & 0 & 8.32e-3 & 0
+\end{bmatrix}
+\end{small}
+\end{equation}
+
+\vspace{0.3in} % 把本章小结挤到下一页
+\begin{figure}[htb] %标定重投影误差
 	\centering
 	\includegraphics[width=5in]{figures/2_2_reprojection_errors}
 	\caption{重投影误差}\label{fig:2_2_reprojection_errors}
 \end{figure}
 
-\begin{figure}[!htb] %标定图像的三维位置
+\begin{figure}[htb] %标定图像的三维位置
 	\centering
 	\includegraphics[width=5in]{figures/2_2_extrinsics}
 	\caption{标定图像的三维位置}\label{fig:2_2_extrinsics}
 \end{figure}
 
-\begin{figure}[!htb] %立体校正后的图像
+\begin{figure}[htb] %立体校正后的图像
 	\centering
 	\includegraphics[width=6in]{figures/2_2_rectified_image}
 	\caption{立体校正后的图像}\label{fig:2_2_rectified_image}
@@ -746,7 +772,7 @@ $\lambda = 1/||\mathbf{A}^{-1}\mathbf{h}_1||$。一般计算得到的矩阵$\mat
 
 %------------------------------------------------------------------------------------
 \section{本章小结}
-本章主要概述了双目立体视觉的基本原理。首先介绍了几个常用的坐标系及其转换关系，并建立了摄像机的线性和非线性数学模型。之后阐述了立体视觉测量原理、平行光轴视觉模型与使用视差计算深度的三角测量原理，并介绍了立体校正的Bouguet算法和立体匹配中常用的几个约束条件。最后使用MATLAB摄像机标定工具箱对ZED双目相机进行标定，获得了其内外参数，为后文建立目标检测与定位系统奠定了基础。
+本章主要概述了双目立体视觉的基本原理。首先介绍了几个常用的坐标系及其转换关系，并建立了摄像机的线性和非线性数学模型。之后阐述了立体视觉测量原理、平行光轴视觉模型与使用视差计算深度的三角测量原理，并介绍了立体校正的Bouguet算法和立体匹配中常用的几个约束条件。最后使用MATLAB和OpenCV对ZED双目相机进行标定，获得了其内外参数，为后文建立目标检测与定位系统奠定了基础。
 
 
 
