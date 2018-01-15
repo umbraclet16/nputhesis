@@ -1216,6 +1216,14 @@ FUNCTION {incollection}
   format.eprint output
   fin.entry
 }
+FUNCTION {nonemptyout}
+{
+  duplicate$ empty$
+    'skip$
+    {", " *}
+  if$
+  output
+}
 FUNCTION {inproceedings}
 { output.bibitem
   format.authors "author" output.check
@@ -1226,15 +1234,15 @@ FUNCTION {inproceedings}
     { format.in.ed.booktitle "booktitle" output.check
       new.sentence
       publisher empty$
-        { format.organization.address output }
-        { organization "organization" bibinfo.check output
-          format.publisher.address output
+        { format.organization.address nonemptyout }
+        { organization "organization" bibinfo.check nonemptyout
+          format.publisher.address nonemptyout
         }
       if$
-      format.bvolume output
-      format.number.series output
+      format.bvolume nonemptyout
+      format.number.series nonemptyout
     }
-    { format.incoll.inproc.crossref output.nonnull
+    { format.incoll.inproc.crossref nonemptyout
     }
   if$
   year.pages.output
