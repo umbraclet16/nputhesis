@@ -156,8 +156,10 @@ DispNetC与基础架构的区别存在于前三层。只需要将基础架构的
 	\caption{DispNet网络结构详细参数}
 	\label{tab:4_1_DispNet_architecture}
 	\begin{small}   % tiny, scriptsize, footnotesize, small.
-		\begin{tabular}{|l|c c c|c c|c|}\hline
-			网络层 & 卷积核 & 步长 & 输入/输出通道数 & 输入分辨率 & 输出分辨率 & 该层输入 \\\hline
+%		\begin{tabular}{|l|c c c|c c|c|}\hline
+		\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}c|ccc|cc|c} \toprule[2pt]
+%			网络层 & 卷积核 & 步长 & 输入/输出通道数 & 输入分辨率 & 输出分辨率 & 该层输入 \\\hline
+			网络层 & 卷积核 & 步长 & 输入/输出通道数 & 输入分辨率 & 输出分辨率 & 该层输入 \\ \midrule[1pt]
 			%---------------------------------------------------------
 			conv1    & 7x7 & 2 & 6/64                & 768x384 & 384x192 & 左右图像 \\
 			conv2    & 5x5 & 2 & 64/128           & 384x192  & 192x96    & conv1 \\
@@ -186,9 +188,10 @@ DispNetC与基础架构的区别存在于前三层。只需要将基础架构的
 			pr2+loss2  & 3x3 & 1 & 64/1        & 192x96   & 192x96    & iconv2 \\
 			upconv1     & 4x4 & 2 & 64/32    & 192x96    & 384x192 & iconv2 \\
 			iconv1        & 3x3 & 1 & 93/32     &384x192  & 384x192 & upconv1+pr2+conv1 \\
-			pr1+loss1  & 3x3 & 1 & 32/1         & 384x192 & 384x192 & iconv1 \\\hline
+%			pr1+loss1  & 3x3 & 1 & 32/1         & 384x192 & 384x192 & iconv1 \\\hline
+			pr1+loss1  & 3x3 & 1 & 32/1         & 384x192 & 384x192 & iconv1 \\ \bottomrule[2pt]
 			%---------------------------------------------------------
-		\end{tabular}
+		\end{tabular*}
     \end{small}
 \end{table}
 
@@ -197,8 +200,10 @@ DispNetC与基础架构的区别存在于前三层。只需要将基础架构的
 	\caption{DispNetC与基础架构差异部分的详细参数}
 	\label{tab:4_1_DispNetC_architecture}
 	\begin{small}
-		\begin{tabular}{|l|c c c|c c|c|}\hline
-			网络层  & 卷积核 & 步长 & 输入/输出通道数 & 输入分辨率 & 输出分辨率 & 该层输入 \\\hline
+%		\begin{tabular}{|l|c c c|c c|c|}\hline
+		\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}c|ccc|cc|c} \toprule[2pt]
+%			网络层  & 卷积核 & 步长 & 输入/输出通道数 & 输入分辨率 & 输出分辨率 & 该层输入 \\\hline
+			网络层  & 卷积核 & 步长 & 输入/输出通道数 & 输入分辨率 & 输出分辨率 & 该层输入 \\ \midrule[1pt]
 			%---------------------------------------------------------
 			conv1a             & 7x7 & 2 & 3/64                & 768x384 & 384x192 & 左图 \\
 			conv1b             & 7x7 & 2 & 3/64                & 768x384 & 384x192 & 右图 \\
@@ -206,8 +211,9 @@ DispNetC与基础架构的区别存在于前三层。只需要将基础架构的
 			conv2b             & 5x5 & 2 & 64/128           & 384x192  & 192x96    & conv1b \\
 			conv\_redir      & 1x1 & 1 & 128/64            & 192x96    & 192x96    & conv2a \\
 			corr                   & --   &  - & 128/81            & 192x96    & 192x96    & conv2a+conv2b \\
-			conv3a            & 5x5 & 2 & 64+81/256    & 192x96    & 96x48      & corr+conv\_redir \\\hline
-		\end{tabular}
+%			conv3a            & 5x5 & 2 & 64+81/256    & 192x96    & 96x48      & corr+conv\_redir \\\hline
+			conv3a            & 5x5 & 2 & 64+81/256    & 192x96    & 96x48      & corr+conv\_redir \\ \bottomrule[2pt]
+		\end{tabular*}
 	\end{small}
 \end{table}
 
@@ -266,8 +272,9 @@ loss_n = \sum_{i=1}^{H_n}\sum_{j=1}^{W_n}{|P_n(i, j) - G_n(i, j)|}
 	\caption{损失函数权重进度表}
 	\label{tab:4_2_loss_weight_schedule}
 	\begin{small} %{scriptsize}
-		\begin{tabular}{|l|cccccc|}\hline
-			迭代次数  & $w_1$ & $w_2$ & $w_3$ & $w_4$ & $w_5$ & $w_6$ \\\hline
+%		\begin{tabular}{|l|cccccc|}\hline
+		\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}ccccccc} \toprule[2pt]
+			迭代次数  & $w_1$ & $w_2$ & $w_3$ & $w_4$ & $w_5$ & $w_6$ \\ \midrule[1pt]
 			%---------------------------------------------------------
 			(0, 50k]           & 0 & 0 & 0 & 0 & 0.2 & 1 \\
 			(50k, 100k]     & 0 & 0 & 0 & 0.2 & 1 & 0.5 \\
@@ -275,8 +282,8 @@ loss_n = \sum_{i=1}^{H_n}\sum_{j=1}^{W_n}{|P_n(i, j) - G_n(i, j)|}
 			(150k, 200k]    & 0 & 0.2 & 1 & 0.5 & 0 & 0 \\
 			(200k, 250k]    & 0.2 & 1 & 0.5 & 0 & 0 & 0  \\
 			(250k, 300k]    & 1 & 0.5 & 0 & 0 & 0 & 0  \\
-			(300k, --)          & 1 & 0 & 0 & 0 & 0 & 0 \\\hline
-		\end{tabular}
+			(300k, --)          & 1 & 0 & 0 & 0 & 0 & 0 \\ \bottomrule[2pt]
+		\end{tabular*}
 	\end{small} %{scriptsize}
 \end{table}
 
@@ -642,16 +649,17 @@ Flyingthings3D是人工合成的数据集，与真实场景具有一定的差异
 	\label{tab:4_3_cmp_kitti}
 %	\begin{small} %{scriptsize}
 		% 两列： 平均错误率，运行时间。
-		\begin{tabular}{|c|c|c|c|}\hline
-			方法             & 平均错误率(\%) & 运行时间(s) \\\hline
+%		\begin{tabular}{|c|c|c|c|}\hline
+		\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}ccc} \toprule[2pt]
+			方法             & 平均错误率(\%) & 运行时间(s) \\ \midrule[1pt]
 			%---------------------------------------------------------
 			AD               & 32.02                 & --      \\
 			CCNN          & 17.70                  & --      \\
 			OCV-BM      & 25.27                  &  0.1    \\
 			SGM            & 10.86                 &  1.1     \\
 			SPS-St         & 5.31                    & 2         \\
-			DispNetC     & 7.74                   & \textbf{0.06}  \\\hline
-		\end{tabular}
+			DispNetC     & 7.74                   & \textbf{0.06}  \\ \bottomrule[2pt]
+		\end{tabular*}
 	
 	%三列：平均视差误差，平均错误率，运行时间。但平均视差误差对于kitti leaderboard上的算法没有数据！
 %		\begin{tabular}{|c|c|c|c|}\hline
@@ -679,14 +687,15 @@ Flyingthings3D是人工合成的数据集，与真实场景具有一定的差异
 	\caption{训练集大小对实验结果的影响}
 	\label{tab:4_3_kitti_dataset_size}
 %	\begin{small}
-		\begin{tabular}{|c|c|c|c|}\hline
-			训练数据量 & 平均视差误差(px) & 平均错误率(\%) \\\hline
+%		\begin{tabular}{|c|c|c|}\hline
+		\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}ccc} \toprule[2pt]
+			训练数据量 & 平均视差误差(px) & 平均错误率(\%) \\ \midrule[1pt]
 			%---------------------------------------------------------
 			40               & 1.9126                   & 11.94                  \\
 			80               & 1.7924                   & 9.60                   \\
 			120             & 1.4898                  & 9.23                    \\
-			160             & 1.3746                  & 7.74                    \\\hline
-		\end{tabular}
+			160             & 1.3746                  & 7.74                    \\ \bottomrule[2pt]
+		\end{tabular*}
 %	\end{small}
 \end{table}
 

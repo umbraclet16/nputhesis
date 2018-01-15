@@ -706,7 +706,8 @@ $\lambda = 1/||\mathbf{A}^{-1}\mathbf{h}_1||$。一般计算得到的矩阵$\mat
 	\centering
 	\caption{ZED双目相机标定结果}\label{tab:2_2_calib_result}
 	\begin{small}
-		\begin{tabular}{ccc|c} \toprule[2pt]
+%		\begin{tabular}{ccc|c} \toprule[2pt]
+		\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}ccc|c} \toprule[2pt]
 			内参数                  & 左相机          & 右相机 & 外参数 \\ \midrule[1pt]
 			$\alpha_x$         & 701.9830   & 703.6765  &
 			\multirow{4}*{$ \mathbf{R} = \left[ \begin{tabular}{ccc}
@@ -719,7 +720,7 @@ $\lambda = 1/||\mathbf{A}^{-1}\mathbf{h}_1||$。一般计算得到的矩阵$\mat
 			畸变系数$k_1$   & -0.1603     & -0.1648 &
 			\multirow{2}*{$\mathbf{t}=[-120.1123 \quad 0.1007 \quad 2.0492]^T$} \\
 			畸变系数$k_2$   & 0.0138       & 0.0174 & \\ \bottomrule[2pt]
-		\end{tabular}
+		\end{tabular*}
 	\end{small}
 \end{table}
 
@@ -745,7 +746,7 @@ $\lambda = 1/||\mathbf{A}^{-1}\mathbf{h}_1||$。一般计算得到的矩阵$\mat
 
 %------------------------------------------------------------------------------------
 \section{本章小结}
-本章主要概述了双目立体视觉的基本原理。首先介绍了几个常用的坐标系及其转换关系，并建立了摄像机的线性和非线性数学模型。之后阐述了立体视觉测量原理、平行光轴视觉模型与使用视差计算深度的三角测量原理，并介绍了立体校正的Bouguet算法和立体匹配中常用的几个约束条件。最后使用MATLAB摄像机标定工具箱对ZED双目相机进行了标定，获得了其内外参数，为后文建立目标检测与定位系统奠定了基础。
+本章主要概述了双目立体视觉的基本原理。首先介绍了几个常用的坐标系及其转换关系，并建立了摄像机的线性和非线性数学模型。之后阐述了立体视觉测量原理、平行光轴视觉模型与使用视差计算深度的三角测量原理，并介绍了立体校正的Bouguet算法和立体匹配中常用的几个约束条件。最后使用MATLAB摄像机标定工具箱对ZED双目相机进行标定，获得了其内外参数，为后文建立目标检测与定位系统奠定了基础。
 
 
 

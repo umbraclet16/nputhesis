@@ -24,7 +24,8 @@ Stereolabs为每一台出厂的相机提供了工业级的标定数据，可用�
 	\caption{ZED双目立体相机参数}
 	\label{tab:5_ZED}
 	\begin{small}
-	\begin{tabular}{|c|c|}\hline
+%	\begin{tabular}{|c|c|}\hline
+	\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}cc} \toprule[2pt]
 		基线长度 & 12cm \\
 		有效深度范围   & 0.5-20m \\
 		分辨率@帧率 & 2208x1242@15/1080P@30/720P@60/672x376@100 \\
@@ -34,8 +35,8 @@ Stereolabs为每一台出厂的相机提供了工业级的标定数据，可用�
 		接口类型 & USB 3.0 \\
 		供电 & 通过USB供电，5V/380mA \\
 		兼容的操作系统 & Windows 7/8/10; Linux \\
-		第三方支持 & ROS, unity, OpenCV, MATLAB \\\hline
-	\end{tabular}
+		第三方支持 & ROS, unity, OpenCV, MATLAB \\ \bottomrule[2pt]
+	\end{tabular*}
 	\end{small}
 \end{table}
 %基线长度: 12cm
@@ -87,15 +88,16 @@ Pixhawk是一款非常流行的开源自动驾驶控制器，可应用于固定�
 	\caption{Pixhawk硬件参数}
 	\label{tab:5_Pixhawk}
 	\begin{small}
-		\begin{tabular}{|c|c|}\hline
+%		\begin{tabular}{|c|c|}\hline
+		\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}cc} \toprule[2pt]
 			处理器 & 32位Arm Cortex M4主处理器（168Mhz/256KB RAM/2MB Flash），32位协处理器 \\
 			传感器 & MPU6000等三轴加速度计、陀螺仪、磁罗盘；MS5611气压计 \\
 			外设接口 & 5个UART串口，2个CAN，I2C，SPI，3.3/6.6V ADC，mini USB等 \\
 			遥控输入 & Specktrum DSM/DSM2/DSM-X卫星输入，Futaba SBUS，PPM \\
 			尺寸 & 长81.5mm，宽50mm，高15.5mm，重量38g \\
 			其他 & 14路PWM输出；冗余的供电输入；外部安全开关、状态指示灯和蜂鸣器
-			\\\hline
-		\end{tabular}
+			\\ \bottomrule[2pt]
+		\end{tabular*}
 	\end{small}
 \end{table}
 
@@ -387,16 +389,17 @@ X_0 \\ Y_0 \\ -H
 	\caption{ZED相机视差与深度的对应关系}
 	\label{tab:5_ZED相机视差与深度的对应关系}
 	\begin{small}
-		\begin{tabular}{|cc|cc|cc|}\hline
-			视差d & 深度Z(mm) & 视差d & 深度Z(mm) & 视差d & 深度Z(mm) \\\hline
+%		\begin{tabular}{|cc|cc|cc|}\hline
+		\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}cccccc} \toprule[2pt]
+			视差d & 深度Z(mm) & 视差d & 深度Z(mm) & 视差d & 深度Z(mm) \\ \midrule[1pt]
 			50      & 1641          & 12      & 6836         & 6        & 13673 \\
 			40      & 2051         & 11       & 7458         & 5        & 16408 \\
 			30      & 2735         & 10       & 8204        & 4        & 20510 \\
 			25      & 3282         & 9        & 9115         & 3        & 27346 \\
 			20      & 4102         & 8        & 10255       & 2        & 41019 \\
 			15      & 5469         & 7        & 11720        & 1         & 82040 \\
-			\hline
-		\end{tabular}
+			\bottomrule[2pt]
+		\end{tabular*}
 	\end{small}
 \end{table}
 

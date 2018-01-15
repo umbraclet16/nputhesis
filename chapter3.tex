@@ -449,16 +449,19 @@ PASCAL VOC数据集的20个类别可以分为四个大类：人类、7种日常�
 	\centering
 	\caption{实验运行环境} \label{tab:3_3_experiment_environment}
 	\begin{small} %{scriptsize}
-		\begin{tabular}{|c|c|}\hline
-			项目  & 配置参数  \\\hline
+%		\begin{tabular}{|c|c|}\hline
+		\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}cc} \toprule[2pt]
+%			项目  & 配置参数  \\ \hline
+			项目  & 配置参数  \\ \midrule[1pt]
 			%---------------------------------------------------------
 			CPU & Intel(R) Xeon(R) CPU E5-2630 v2 @2.60GHz, 12核 \\
 			内存 & 24G \\
 			显卡 & NVidia GeForce GTX TITAN X \\
 			显存 & 12G \\
 			CUDA & V7.5 \\
-			操作系统 & Ubuntu 16.04.1 LTS \\\hline
-		\end{tabular}
+%			操作系统 & Ubuntu 16.04.1 LTS \\ \hline
+			操作系统 & Ubuntu 16.04.1 LTS \\ \bottomrule[2pt]
+		\end{tabular*}
 	\end{small} %{scriptsize}
 \end{table}
 
@@ -474,8 +477,10 @@ TensorFlow具有自动求微分的功能，非常适合于深度神经网络这�
 	\centering
 	\caption{实验参数设置} \label{tab:3_3_params}
 	\begin{small} %{scriptsize}
-		\begin{tabular}{|c|c|c|c|c|c|}\hline
-			模型参数                   & 取值  & 训练参数              & 取值       & 测试参数   & 取值 \\\hline
+%		\begin{tabular}{|c|c|c|c|c|c|}\hline
+		\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}cccccc} \toprule[2pt]
+%			模型参数                   & 取值  & 训练参数              & 取值       & 测试参数   & 取值 \\\hline
+			模型参数                   & 取值  & 训练参数              & 取值       & 测试参数   & 取值 \\ \midrule[1pt]
 			%---------------------------------------------------------
 			IMAGE\_SIZE            & 448   &  LEARNING\_RATE & 0.0001   & THRESHOLD & 0.2 \\
 			CELL\_SIZE               & 14     &  DECAY\_STEPS     & 30000    & IOU\_THRESHOLD & 0.5 \\
@@ -485,8 +490,9 @@ TensorFlow具有自动求微分的功能，非常适合于深度神经网络这�
 			$\lambda_{noobj}$    & 0.5    &  MAX\_ITER           & 30000    & & \\
 			%TODO:MAX_ITER写1w5还是3w? 不贴图就写3w吧。
 			$\lambda_{class}$     & 2       &  SUMMARY\_ITER  & 10         &  & \\
-			$\lambda_{coord}$    & 5       & SAVE\_ITER           & 1000      &  & \\\hline
-		\end{tabular}
+%			$\lambda_{coord}$    & 5       & SAVE\_ITER           & 1000      &  & \\\hline
+			$\lambda_{coord}$    & 5       & SAVE\_ITER           & 1000      &  & \\ \bottomrule[2pt]
+		\end{tabular*}
 	\end{small} %{scriptsize}
 \end{table}
 
