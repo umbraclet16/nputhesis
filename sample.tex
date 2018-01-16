@@ -10,14 +10,32 @@
 
 \usepackage{lipsum}
 
+%>>>>>>>>>> copy from deeplearningbook-chinese repo >>>>>>>>>>
+\usepackage[chapter]{algorithm}
+\usepackage{algorithmic}
+% Include chapter number in algorithm number
+\renewcommand{\thealgorithm}{\arabic{chapter}.\arabic{algorithm}}
+\makeatletter
+\renewcommand*{\ALG@name}{算法}
+\makeatother
+%<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+% 缩小参考文献纵向间距
+\usepackage[numbers,sort&compress]{natbib}
+\setlength{\bibsep}{0pt plus 0.3ex}  % vertical spacing between references
+% 添加书签和参考文献跳转
+\usepackage[colorlinks,linkcolor=black,anchorcolor=black,citecolor=black,urlcolor=black,bookmarksopen=true]{hyperref}%此宏包应放在所有宏包之后
+%\usepackage{tabularx} % 需要手动指定列宽，否则和tarbular*效果一样，不用了
+% （tarbularx修改列宽，tarbular*修改列间空白的宽度）
+
 \schoolno{10699}
-%\classno{}
+\classno{V249}
 %\secretlevel{}
-\title[Research on Vision-based Object Detection and Localization for Rotorcraft UAVs]{基于视觉的旋翼无人机目标检测定位方法研究}
-\author[You Fang]{方酉}
+% 题目强制分行，每行10字
+\title[Research on Vision-based Object Detection and Localization for Rotorcraft UAVs]{基于视觉的旋翼无人机\\目标检测定位方法研究}
+%\author[You Fang]{方酉}
 \authorno{2015201548}
 \major[Control Theory and Control Engineering]{控制理论与控制工程}
-\supervisor[Weiguo Zhang]{章卫国}
+%\supervisor[Weiguo Zhang]{章卫国}
 \applydate[March 2018]{2018~年~3~月}
 %\support{本文研究得到某某基金(编号:XXXXXXX)资助。}
 
@@ -33,42 +51,13 @@
 \tableofcontents 
 %==============================
 \mainmatter  % 
+
 %==============================
-%          乱七八糟的想法记在这
-%>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-% 每章第一节加个引言？
-
-% 4.2 介绍Tensorflow的部分可能要放在第三章。
-%（（TensorFlow是谷歌基于DistBelief开发的第二代人工智能学习系统，其采用数据流图(data flow graph)的形式来建立模型，图中每个节点表示一个数学运算或数据的输入/输出，每条边则表示节点间的输入输出关系，边上传输的是多维数组数据，即张量(Tensor)。TensorFlow具有自动求微分的功能，非常适合于深度学习等基于梯度的机器学习算法。））
-
-% 计算机配置也放在第三章。
-%本实验使用的计算机配置见表\ref{}。
-%
-%\begin{table}[htbp]
-%	\centering
-%	\caption{实验运行环境}
-%	\label{tab:4_2_experiment_environment}
-%	\begin{small} %{scriptsize}
-%		\begin{tabular}{|l|c|}\hline
-%			项目  & 内容  \\\hline
-%			%---------------------------------------------------------
-%			CPU & Intel(R) Xeon(R) CPU E5-2630 v2 @2.60GHz, 12核 \\
-%			内存 & 24G \\
-%			显卡 & NVidia GeForce GTX TITAN X \\
-%			显存 & 12G \\
-%			CUDA & V7.5 \\
-%			操作系统 & Ubuntu 16.04.1 LTS \\\hline
-%		\end{tabular}
-%	\end{small} %{scriptsize}
-%\end{table}
-
-
-%<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-%==============================
+\parskip = 0pt % 防止页面空白被平均分到各段间
 % 综述
 \input{chapter1}
 
-% 摄像机模型与标定
+% 双目立体视觉理论基础
 \input{chapter2}
 
 % 基于YOLO的目标检测
@@ -82,19 +71,20 @@
 
 % 总结与展望
 \input{chapter6}
+
 %==============================
 
 \backmatter
 \bibliographystyle{nputhesis}
 \bibliography{ref}
 
-\Appendix
-This is appendix.
+%\Appendix
+%This is appendix.
 
 \Thanks
-This is a thanks.
+\input{thanks}
 
-\Work
+%\Work
 % TODO 如何直接引用使参考文献的内容显示在这里
 
 \statement
