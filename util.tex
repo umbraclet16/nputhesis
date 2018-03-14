@@ -90,3 +90,67 @@ subfloat 命令缺少宽度参数。虽然我们可以用 \hspace 命令调整�
 	\caption{Example of placing a figure with experimental results.}
 	\label{fig:res}
 \end{figure}
+
+%=========================================================
+\eqref{}比\ref{}多显示个小括号。
+
+%=========================================================
+%联立方程组，分别编号
+ \begin{equation}
+\left\{                          注意这里是“ \{ "
+\begin{aligned}
+a+b&=2\\
+a-b&=4\\
+\end{aligned}
+\right.
+\end{equation}
+
+\begin{equation}
+\left\{
+\begin{array}{l}
+a+b=2\\
+a-b=4\\
+\end{array}
+\right.
+\end{equation}
+
+% 公式换行（多行公式）可用split, align, gather, multiline, eqnarray环境。
+% split 是不能跨页的。split 适合单个公式换行，即一个公式较长需要拆开。
+
+%\notag 指令 会取消对应公式的编号
+\usepackage{cases}
+\begin{numcases}{f(x)= }
+	f_1(x) = a + b -3c \label{EQ_1} \\
+	f_2(x) = 2a + 5b +c \notag \\
+	f_3(x) = 4a + 2b -c \label{EQ_3}
+\end{numcases} 
+
+\begin{cases} % &用于对齐
+	xxx \\
+	yyy \\
+\end{cases}
+
+
+%行列式。换成\left(或\left[就得到矩阵
+\[
+\left|\begin{array}{cccc}   
+	1 &    6    & 9 \\   
+	7 &    90   & f(x)\\   
+	9 & \psi(x) & g(x)   
+\end{array}\right|   
+\]
+
+\begin{gather*}
+\begin{matrix} 1&0\\ 0&-1 \end{matrix}~~~~~  %无括号
+\begin{pmatrix} 1&0\\ 0&-1 \end{pmatrix}~~~~~  %圆括号
+\begin{Bmatrix} 1&0\\ 0&-1 \end{Bmatrix}\\  %大括号
+\begin{bmatrix} 1&0\\ 0&-1 \end{bmatrix} ~~~~~  %中括号
+\begin{vmatrix} 1&0\\ 0&-1 \end{vmatrix}~~~~~  %行列式
+\begin{Vmatrix} 1&0\\ 0&-1 \end{Vmatrix}  %双竖线行列式
+\end{gather*}
+
+
+% 矩阵乘法
+\begin{eqnarray}\label{eqexpmuts}
+\begin{pmatrix} P_{kx}  \\ P_{ky} \end{pmatrix}= \begin{pmatrix} [1-K_{kx}]^{2} & 0 \\ 0 & [1-K_{ky}]^{2} \end{pmatrix}\begin{pmatrix} P_{(k,k-1)x}  \\ P_{(k,k-1)y} \end{pmatrix}+\begin{pmatrix} K^{2}_{kx}     R_{kx}  \\  K^{2}_{ky}     R_{ky}  \end{pmatrix}
+\end{eqnarray}
