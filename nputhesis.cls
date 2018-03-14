@@ -263,7 +263,7 @@
     %\Large This Page Intentionally Left Blank!
   %\end{center}
   \vspace{\fill}
-  \thispagestyle{empty}
+  %\thispagestyle{empty}
   \newpage
   \if@twocolumn\hbox{}\newpage\fi\fi\fi}
 
